@@ -319,6 +319,127 @@ AI Character 서비스가 계속 생긴다고 해서 모두 살아남는 것은 
 
 ---
 
+## 11. Character-first ↔ Story-first: 실제 시장의 확장 방향
+
+캐릭터챗과 스토리챗은 장기적으로 완전히 분리된 시장이라기보다 **출발점이 다른 AI Entertainment Product**로 수렴할 가능성이 있다.
+
+### 11.1 Character → Story 확장: Character.AI
+
+Character.AI는 시작점이 1:1 Character Chat이었지만 이후 제품 범위를 지속적으로 서사·세계관·멀티모달 콘텐츠로 넓혔다.
+
+- 2025년 6월 Character.AI는 자사가 1:1 text chat에서 출발했다고 명시하면서 Scenes 등 immersive narrative 기능으로 확장한다고 발표했다.
+- 2025년 10월 Scenes 제작 기능을 전면 개방하며 기존 Character를 story-driven world 안에서 활용할 수 있게 했다.
+- 2025년 11월 Stories를 출시해 2~3개의 Character를 골라 장르·premise를 설정하고 branching interactive fiction을 만들 수 있게 했다.
+- 2026년 7월 Lorebook을 도입해 Character Definition 바깥의 장소·사이드 캐릭터·이벤트·세계 규칙 등을 필요할 때 불러오는 구조를 제공했다.
+- 2026년 9월에는 chat을 multi-page comic으로 변환하는 c.ai Comics를 공개하며 chat → story → visual content까지 확장했다.
+
+이 흐름은 다음과 같이 정리할 수 있다.
+
+> **Character Chat → Scene → Story → Lore / World → Comic / Multimodal IP**
+
+즉 Character를 먼저 확보하고, 사용자가 이미 애착을 가진 Character를 중심으로 narrative와 world를 확장하는 방식이다.
+
+### 11.2 국내: Character와 Story가 양방향으로 연결되는 Crack
+
+국내 Crack은 Character와 Story를 서로 다른 콘텐츠 단위로 운영하지만 둘을 연결할 수 있는 구조를 갖고 있다.
+
+- Character는 고유한 성격·말투를 가진 1:1 대화 중심 콘텐츠로 정의된다.
+- Story는 더 복잡한 세계관과 다수 요소를 포함한 AI 기반 상호작용형 콘텐츠로 정의된다.
+- Character 생성 화면에는 **‘이 캐릭터가 등장하는 스토리’**를 연결하는 기능이 제공된다.
+- Story 제작은 프로필 → 스토리 설정 → 시작 설정 → 미디어 → 키워드북 → 엔딩 등 Character 제작보다 더 많은 콘텐츠 구조를 요구한다.
+
+따라서 국내에서도 실제 제품 설계상:
+
+> **Character ↔ Story**
+
+의 연결이 이미 나타나고 있으며, Character를 독립적인 대화 상품으로 소비하다가 Story 안으로 확장하거나 Story의 등장인물을 Character 단위로 분리하는 구조가 가능하다.
+
+### 11.3 Story → Character 강화: AI Dungeon의 사례
+
+AI Dungeon은 story/world 중심의 AI interactive fiction에서 출발했지만 Story Cards를 통해 Character·Location·Concept 등을 별도의 기억 단위로 관리한다.
+
+Story가 길어질수록 결국 다음 문제가 중요해진다.
+
+- 등장인물의 성격과 행동 일관성
+- 인물 간 관계
+- 과거 사건 기억
+- 장소·세계관 정보
+
+즉 **Story-first 제품도 깊어질수록 Character / Persona / Memory 구조를 필요로 한다.**
+
+### 11.4 시장 구조에 대한 해석
+
+실제 사례를 보면 두 방향 모두 존재한다.
+
+> **Character-first → Story / World / Visual Content**
+
+그리고
+
+> **Story-first → Character / Persona / Relationship Depth**
+
+따라서 장기적인 시장 경쟁은 ‘캐릭터챗 vs 스토리챗 중 하나만 살아남는다’보다는:
+
+> **어떤 entry point에서 더 빠르게 사용자의 애착을 확보한 뒤 Character·Story·World·Visual IP를 하나의 생태계로 확장하는가**
+
+의 경쟁이 될 가능성이 있다.
+
+### 11.5 본 프로젝트의 선택: Character-led IP Expansion
+
+본 프로젝트에서는 초기 entry point를 **Character Chat**으로 잡는다.
+
+Story Chat은 높은 작품성·화제성·world building 잠재력이 있지만 초기에 plot, branching, pacing, world consistency, writer/editorial operation 등이 필요해 실험 비용이 커질 수 있다.
+
+반면 Character Chat은:
+
+- Persona
+- Voice
+- Relationship setting
+- Memory
+
+정도만으로도 작은 MVP를 만들 수 있어 캐릭터 단위로 빠르게 실험하기 쉽다.
+
+따라서 전략 가설은 다음과 같다.
+
+> **Character MVP → Interaction Validation → Winner Selection → Narrative Expansion → IP Expansion**
+
+캐릭터챗 자체를 종착점으로 보지 않는다.
+
+먼저 여러 캐릭터·관계성을 빠르게 테스트하고, 실제 interaction data에서 반응이 확인된 후보만:
+
+- Backstory
+- Character relationship
+- World / Lore
+- Interactive Story
+- Webtoon / Comic
+- Game
+- Digital / Physical Goods
+
+등으로 확장한다.
+
+이를 **Character-led IP Expansion Strategy** 또는 **Character-first, Narrative-later**로 정의한다.
+
+### 11.6 핵심 사업 가설
+
+전통적인 Story-first 접근이 ‘작품을 먼저 제작하고 반응을 기다리는 방식’이라면, 본 프로젝트가 보는 Character-first 방식은:
+
+> **작은 Character를 먼저 출시 → 행동 데이터 확보 → 먹히는 후보 선별 → 콘텐츠 제작비 집중**
+
+에 가깝다.
+
+즉 Character Chat은 단순한 대화 서비스가 아니라:
+
+> **IP Discovery Engine**
+
+으로 활용될 가능성이 있다.
+
+한 줄로 정리하면:
+
+> **덕심으로 만들고 → 기술로 구현하고 → 데이터로 선별하고 → 콘텐츠로 키운다.**
+
+다만 Character-first가 항상 Story-first보다 우월하다는 의미는 아니다. 초기 제작비, 검증 속도, 팀 구성 측면에서 본 프로젝트가 선택한 **시장 진입 전략 가설**이며, 실제 성과는 사용자 행동과 수익성으로 검증해야 한다.
+
+---
+
 # 발표 초안
 
 ## Slide 1. 시작 질문
@@ -377,7 +498,61 @@ AI Character 서비스가 계속 생긴다고 해서 모두 살아남는 것은 
 
 ---
 
-## Slide 5. 그런데 왜 많은 캐릭터챗이 망할 수 있는가
+## Slide 5. Why Character, not Story?
+
+### 작품을 먼저 만들 것인가, 관계를 먼저 검증할 것인가
+
+**Story Chat**
+- 높은 작품성·화제성·세계관/IP 확장 잠재력
+- Plot / Branching / Pacing / World consistency 운영 필요
+- 초기 실험 단위와 콘텐츠 제작 비용이 큼
+
+**Character Chat**
+- Persona / Voice / Relationship으로 작은 MVP 가능
+- Character 단위 빠른 실험 가능
+- Memory / Voice / 관계성을 분리해 검증하기 쉬움
+
+> **초기 시장 진입에서는 더 큰 작품보다 더 빠른 학습을 선택한다.**
+
+---
+
+## Slide 6. 시장에서도 양방향 확장이 나타난다
+
+### Character → Story
+Character.AI:
+
+> 1:1 Chat → Scenes → Stories → Lorebook → Comics
+
+### Character ↔ Story
+국내 Crack:
+
+> Character와 Story를 별도 콘텐츠로 운영하면서 Character를 Story에 연결
+
+### Story → Character depth
+AI Dungeon:
+
+> Story / World → Story Cards → Character / Location / Concept memory
+
+핵심 메시지:
+
+> **캐릭터와 스토리는 경쟁하는 종착점이라기보다 서로 확장되는 두 개의 entry point다.**
+
+---
+
+## Slide 7. Character-first → Narrative Expansion
+
+> **Character MVP → 반응 검증 → Winner Selection → Narrative → IP**
+
+- 여러 캐릭터를 낮은 비용으로 먼저 테스트
+- 실제 interaction data로 먹히는 캐릭터·관계성 선별
+- 검증된 후보에만 서사·세계관 제작비 투자
+- Story / Comic / Game / Goods 등으로 확장
+
+> **Character Chat을 IP Discovery Engine으로 활용할 수 있는가?**
+
+---
+
+## Slide 8. 그런데 왜 많은 캐릭터챗이 망할 수 있는가
 
 서비스를 만드는 것 자체는 점점 쉬워진다.
 
@@ -395,7 +570,7 @@ AI Character 서비스가 계속 생긴다고 해서 모두 살아남는 것은 
 
 ---
 
-## Slide 6. 해외 서비스는 무엇으로 차별화하는가
+## Slide 9. 해외 서비스는 무엇으로 차별화하는가
 
 - Character.AI → Creator ecosystem + UGC + Memory/Lorebook
 - Replika → 1:1 relationship + Memory + voice/video
@@ -409,7 +584,7 @@ AI Character 서비스가 계속 생긴다고 해서 모두 살아남는 것은 
 
 ---
 
-## Slide 7. AI 품질은 ‘운영’에서 만들어진다
+## Slide 10. AI 품질은 ‘운영’에서 만들어진다
 
 > **Model만 붙이면 끝이 아니다.**
 
@@ -425,7 +600,7 @@ Persona → Prompt → Context → Memory → Retrieval → Eval → 반복 개�
 
 ---
 
-## Slide 8. 수익모델과 Unit Economics
+## Slide 11. 수익모델과 Unit Economics
 
 수익:
 - Subscription
@@ -446,7 +621,7 @@ Persona → Prompt → Context → Memory → Retrieval → Eval → 반복 개�
 
 ---
 
-## Slide 9. 내가 보고 싶은 차별화 — 덕심 × 기술력
+## Slide 12. 내가 보고 싶은 차별화 — 덕심 × 기술력
 
 ### Fandom Taste × AI Quality Engineering
 
@@ -467,7 +642,7 @@ Persona → Prompt → Context → Memory → Retrieval → Eval → 반복 개�
 
 ---
 
-## Slide 10. 그래서 데이터로 무엇을 확인할 것인가
+## Slide 13. 그래서 데이터로 무엇을 확인할 것인가
 
 시장 조사는 가능성을 보여주지만 실제 Product Decision에는 사용자 행동 근거가 필요하다.
 
@@ -487,7 +662,7 @@ Persona → Prompt → Context → Memory → Retrieval → Eval → 반복 개�
 
 ---
 
-## Slide 11. 이후 검증
+## Slide 14. 이후 검증
 
 1. PIPPA 데이터 분석
 2. Product Problem 1개 도출
@@ -499,7 +674,7 @@ Persona → Prompt → Context → Memory → Retrieval → Eval → 반복 개�
 
 ---
 
-## Slide 12. Closing
+## Slide 15. Closing
 
 > **AI Companion은 단순 챗봇 시장이 아니라, 관계·콘텐츠·AI 기술이 결합되는 Consumer Product Market이다.**
 
@@ -516,6 +691,9 @@ Persona → Prompt → Context → Memory → Retrieval → Eval → 반복 개�
 - 시장 선택 질문과 Product Thesis
 - 글로벌 AI Companion 성장 근거
 - 국내 Zeta 사례
+- **Why Character, not Story?**
+- **Character ↔ Story 실제 시장 확장 사례**
+- **Character-led IP Expansion / IP Discovery Engine 가설**
 - 경쟁사 Positioning Map
 - Revenue Model / Cost Structure
 - TAM/SAM/SOM Working Model
@@ -537,6 +715,9 @@ Persona → Prompt → Context → Memory → Retrieval → Eval → 반복 개�
 - Zeta 누적 가입자·매출/영업이익 공개 수치
 - Character.AI / Replika / Talkie의 subscription 구조
 - 공개된 Memory / Lorebook / Prompt 구조
+- Character.AI가 1:1 Chat에서 Scenes, Stories, Lorebook, Comics 등으로 콘텐츠 포맷을 확장한 사실
+- Crack이 Character와 Story를 별도 콘텐츠 단위로 제공하고 Character를 Story에 연결하는 기능을 제공하는 사실
+- AI Dungeon이 Story Cards를 통해 Character·Location·Concept 등을 story context로 관리하는 사실
 
 ### 아직 가설인 것
 - “감정적 가치는 utility보다 방어력이 높다”
@@ -544,6 +725,8 @@ Persona → Prompt → Context → Memory → Retrieval → Eval → 반복 개�
 - “Memory/Character Voice가 retention을 높인다”
 - “KR+JP Companion 시장이 Global의 10%다”
 - “IP/Fandom Commerce가 유의미한 신규 수익원이 된다”
+- “Character-first가 Story-first보다 초기 실험 효율에서 유리하다”
+- “Character Chat 데이터를 통해 향후 IP 투자 후보를 선별할 수 있다”
 
 가설은 발표에서 사실처럼 단정하지 않고 이후 분석·실험 대상으로 표현한다.
 
@@ -572,17 +755,39 @@ Persona → Prompt → Context → Memory → Retrieval → Eval → 반복 개�
 7. Character.AI Lorebook  
    https://blog.character.ai/lorebook/
 
-8. Replika Subscription  
+8. Character.AI — New Ways to Create (1:1 chat → multimodal / Scenes)  
+   https://blog.character.ai/character-ai-unveils-new-ways-to-create/
+
+9. Character.AI — Scenes  
+   https://blog.character.ai/introducing-scenes-your-new-way-to-tell-stories-on-c-ai/
+
+10. Character.AI — Stories  
+    https://blog.character.ai/introducing-stories-a-new-way-to-create-play-and-share-adventures-with-your-favorite-characters/
+
+11. Character.AI — Comics / Interactive Future of Fandom  
+    https://blog.character.ai/cai-comics/
+
+12. Replika Subscription  
    https://help.replika.com/hc/en-us/articles/39551043419149-Choosing-a-Subscription
 
-9. Replika Memory  
+13. Replika Memory  
    https://help.replika.com/hc/en-us/articles/37208679176077-How-does-Replika-s-memory-work
 
-10. Talkie FAQ / Creator monetization  
+14. Talkie FAQ / Creator monetization  
     https://book.talkie-ai.com/faq/
 
-11. Crack Prompt / Character Chat 구조  
-    https://help.crack.wrtn.ai/character/prompt
+15. Crack — 캐릭터란  
+    https://help.crack.wrtn.ai/guide/user/character/what-is-character
+
+16. Crack — 스토리란 / Story 제작  
+    https://help.crack.wrtn.ai/guide/user/story/what-is-story
+    https://help.crack.wrtn.ai/tutorial/story
+
+17. Crack — 캐릭터 상세 / Story 연결  
+    https://help.crack.wrtn.ai/guide/user/tutorial/character/5
+
+18. AI Dungeon — Story Cards  
+    https://help.aidungeon.com/faq/story-cards
 
 ---
 
@@ -592,3 +797,4 @@ Persona → Prompt → Context → Memory → Retrieval → Eval → 반복 개�
 - 공개 자료와 가설을 구분한다.
 - 경쟁사를 단순 기능표가 아니라 **Positioning / Monetization / Quality Mechanism** 관점에서 본다.
 - 데이터 분석 기획과 시장 전략을 섞지 않고, 마지막 Product Decision 단계에서만 연결한다.
+- Character-first 전략은 검증된 성공 공식이 아니라 **초기 시장 진입 및 학습 속도를 높이기 위한 전략 가설**로 다룬다.
