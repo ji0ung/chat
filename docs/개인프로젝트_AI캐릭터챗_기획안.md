@@ -146,3 +146,53 @@ Microsoft Research의 Rushes는 2026년 공개된 interactive narrative 데이�
 - 관계성 스코어의 기준·가중치는 분석자가 직접 정의한다.
 - 결제 데이터가 없으므로 과금 효과를 직접 입증했다고 주장하지 않는다.
 - 후속 스토리챗 비교는 별도 프로젝트 또는 확장 분석으로 분리한다.
+- 오픈소스 캐릭터챗 분석은 제품·기술 구조 이해를 목적으로 하며, 완성형 캐릭터챗 구현은 본 프로젝트 범위에 포함하지 않는다.
+- 필요 시 핵심 기능 1개에 한해 Prototype 또는 Eval 실험으로 확장한다.
+
+## 13. AI Product Understanding — 오픈소스 캐릭터챗 구조 분석
+
+### 13.1 목적
+완성형 캐릭터챗을 직접 개발하는 것이 아니라, 공개된 오픈소스 프로젝트를 통해 **캐릭터챗의 실제 제품·기술 구조를 이해하고 데이터 분석 결과를 구현 가능한 Product Hypothesis로 연결하는 것**을 목표로 한다.
+
+데이터 분석이 “어떤 상호작용이 대화를 지속시키는가”를 밝히는 단계라면, 본 트랙은 “그 상호작용을 제품에서는 어떤 구조로 구현할 수 있는가”를 이해하는 단계다.
+
+### 13.2 분석 대상 후보
+- **RisuAI** — Persona / Lorebook / Memory / Prompt 구조
+- **SillyTavern** — Character Card / Context / Memory 확장 구조
+- **a16z Companion App** — Retrieval + Memory 기반 최소 Companion 구조
+- **OpenPersona** — Persona / Memory / Voice 구조 참고
+
+### 13.3 확인할 질문
+1. Character Persona는 어떻게 정의되고 LLM 입력에 주입되는가?
+2. Conversation Context는 어떤 방식으로 유지되는가?
+3. 장기 Memory는 무엇을 저장하고, 언제 retrieval하는가?
+4. Persona Consistency는 어떤 구조로 유지되는가?
+5. Context Window 한계는 어떻게 처리하는가?
+6. Prompt는 어떤 구성 요소로 조립되는가?
+7. 품질·Latency·Cost 사이에는 어떤 trade-off가 있는가?
+8. 데이터 분석에서 발견한 interaction pattern을 실제 기능으로 구현하려면 어떤 기술 메커니즘이 필요한가?
+
+### 13.4 Product 연결 프레임
+분석 결과를 아래 구조로 연결한다.
+
+> **Data Finding → Product Problem → Technical Mechanism → Feature Hypothesis**
+
+예시:
+
+> 과거 맥락을 이어받는 응답 이후 conversation continuation이 높다
+> → 관계 연속성이 engagement에 영향을 줄 가능성
+> → Memory Retrieval / Context Injection 구조 확인
+> → Relationship Memory 기능 가설
+> → 향후 Eval 또는 Prototype 실험 후보
+
+### 13.5 산출물
+- 캐릭터챗 핵심 시스템 구조도
+- Persona / Prompt / Context / Memory / Retrieval 구성요소 정리
+- 오픈소스 프로젝트별 구현 접근 비교
+- 데이터 분석 결과와 기술 메커니즘의 연결표
+- Memory / Personalization / Character Consistency 중 우선 검증할 Product Hypothesis 도출
+
+### 13.6 확장 원칙
+본 트랙의 목적은 기술 스택 자체를 깊게 구현하는 것이 아니라, AI Product Manager 관점에서 기능이 어떤 구조와 제약 위에서 동작하는지 이해하는 것이다.
+
+따라서 전체 캐릭터챗 구현은 하지 않으며, 분석 결과상 가장 중요한 기능이 명확해질 경우에만 해당 기능 1개에 대해 Prototype 또는 Eval을 수행한다.
