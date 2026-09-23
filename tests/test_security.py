@@ -40,6 +40,8 @@ class SecurityPolicyTests(unittest.TestCase):
 
     def test_low_signal_not_stored(self):
         self.assertFalse(should_store_as_memory("ㅋㅋ"))
+        self.assertFalse(should_store_as_memory("ㅎㅎㅎㅎ"))
+        self.assertFalse(should_store_as_memory("?"))
         self.assertTrue(should_store_as_memory("나는 민트초코를 좋아해"))
 
     def test_rate_limiter(self):
