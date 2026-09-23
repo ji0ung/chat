@@ -19,7 +19,6 @@
         </div>
 
         <button class="new-chat" id="newChat" type="button"><span>＋</span> 새 대화</button>
-        <a class="admin-link" href="/admin.html"><span>⌁</span> 운영 콘솔</a>
 
         <div class="side-section">
           <p class="eyebrow">CHARACTER</p>
@@ -28,19 +27,15 @@
         </div>
 
         <div class="side-section connection">
-          <div class="section-title"><p class="eyebrow">CONNECTION</p><span id="statusDot" class="status-dot"></span></div>
-          <label class="field-label" for="apiUrl">백엔드 API 주소</label>
-          <input id="apiUrl" type="url" value="https://chat-7bf4.onrender.com" spellcheck="false" />
-          <label class="field-label" for="accessToken">테스트 액세스 코드</label>
-          <input id="accessToken" type="password" autocomplete="off" placeholder="공유받은 코드 입력" />
-          <button id="saveSettings" class="text-button" type="button">연결 저장 및 확인</button>
-          <p id="connectionText" class="connection-text">연결을 확인해 주세요</p>
+          <div class="section-title"><p class="eyebrow">ACCESS</p><span id="statusDot" class="status-dot"></span></div>
+          <p class="connection-copy">테스트 액세스 코드를 인증한 사용자만 대화할 수 있습니다.</p>
+          <p id="connectionText" class="connection-text">액세스 코드가 필요합니다</p>
         </div>
 
-        <div class="privacy"><span>◉</span><p><strong>사용자별 기억 격리</strong><br />액세스 코드는 현재 탭의 세션에만 보관되며 서버가 사용자 ID를 확정합니다.</p></div>
+        <div class="privacy"><span>◉</span><p><strong>사용자별 기억 격리</strong><br />서버가 액세스 코드에 연결된 사용자 ID를 확정합니다.</p></div>
       </aside>
 
-      <main class="chat">
+      <main class="chat" id="chatArea">
         <header class="chat-header">
           <div class="identity">
             <div class="avatar">L<span class="online"></span></div>
@@ -71,6 +66,19 @@
           <p class="hint">Enter로 전송 · Shift + Enter로 줄바꿈</p>
           <button id="evaluateButton" class="evaluate-button" type="button">세션 평가하기 · 1~5점</button>
         </form>
+
+        <section id="accessGate" class="access-gate" aria-labelledby="accessGateTitle">
+          <form id="accessForm" class="access-card">
+            <div class="brand-mark access-mark"><span></span><span></span><span></span></div>
+            <p class="eyebrow">PRIVATE TEST</p>
+            <h2 id="accessGateTitle">테스트 액세스 코드</h2>
+            <p>공유받은 코드를 입력하면 루나와 대화를 시작할 수 있어요.</p>
+            <label class="field-label" for="accessToken">액세스 코드</label>
+            <input id="accessToken" type="password" autocomplete="off" placeholder="액세스 코드 입력" required />
+            <button id="accessButton" class="access-button" type="submit">입장하기</button>
+            <p id="accessError" class="access-error" role="alert"></p>
+          </form>
+        </section>
       </main>
 
       <aside id="memoryPanel" class="memory-panel">
