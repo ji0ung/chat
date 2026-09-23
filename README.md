@@ -65,18 +65,17 @@ Render 같은 외부 환경에서는 `APP_ENV=production`으로 실행합니다.
 APP_ENV=production
 MVP_ACCESS_TOKENS=friend-code-1:user-1,friend-code-2:user-2
 ADMIN_API_TOKEN=충분히-긴-관리자-비밀값
-LOG_HASH_SALT=충분히-긴-랜덤-salt
 ALLOWED_ORIGINS=https://luna-memory-web.onrender.com
 LOG_INCLUDE_CONTENT=false
 ```
 
 - `MVP_ACCESS_TOKENS`: `액세스코드:user_id` 형식이며 여러 명은 쉼표로 구분합니다. 공유 사용자에게는 **콜론 앞쪽 액세스 코드 하나만** 전달합니다. 프론트 로그인 UI에도 앞쪽 코드만 입력하며 `:user_id`나 전체 환경변수 문자열은 입력하지 않습니다.
 - `ADMIN_API_TOKEN`: 운영 콘솔에서 사용하는 별도 관리자 비밀값입니다. 일반 사용자에게 공유하지 않습니다.
-- `LOG_HASH_SALT`: 로그의 사용자 식별자 해시에만 사용하는 랜덤 비밀값입니다.
+- 로그 사용자 식별자 해시용 salt는 `ADMIN_API_TOKEN`에서 서버가 내부적으로 파생합니다. 별도 `LOG_HASH_SALT` 설정은 필요하지 않습니다.
 - 프론트의 액세스 코드와 관리자 토큰은 `sessionStorage`에만 저장되어 브라우저 탭을 닫으면 사라집니다.
 - 실제 서비스 로그인으로 확장할 때는 이 MVP 토큰 방식을 JWT/서버 세션으로 교체하세요.
 
-Render Dashboard의 API 서비스 → Environment에서 위 세 값을 직접 넣어야 합니다. 비밀값은 GitHub에 커밋하지 않습니다.
+Render Dashboard의 API 서비스 → Environment에서 `MVP_ACCESS_TOKENS`와 `ADMIN_API_TOKEN`을 직접 넣어야 합니다. 비밀값은 GitHub에 커밋하지 않습니다.
 
 ## 처리 흐름
 
@@ -201,7 +200,7 @@ curl -X POST http://127.0.0.1:8000/chat \
 | `LOG_MAX_BYTES` | `10485760` | 파일 하나의 최대 크기(기본 10MB) |
 | `LOG_BACKUP_COUNT` | `7` | 회전 후 보관할 이전 로그 수 |
 | `LOG_INCLUDE_CONTENT` | `false` | 대화 원문 기록 여부 |
-| `LOG_HASH_SALT` | 개발용 기본값 | 사용자 식별자 해시에 사용할 비밀 salt |
+| `LOG_HASH_SALT` | 선택사항 | 미설정 시 `ADMIN_API_TOKEN`에서 자동 파생되는 로그 식별자 해시 salt |
 
 중요도는 API 요청에서 0~1로 지정합니다. MVP에서는 호출자가 직접 부여하지만, 운영 버전에서는 규칙 또는 별도 모델로 선호·약속·관계 변화 같은 사건만 높게 평가하는 것을 권장합니다.
 
@@ -219,7 +218,7 @@ curl -X POST http://127.0.0.1:8000/chat \
 
 모든 이벤트에는 `request_id`가 들어가므로 한 번의 채팅 요청을 연결해서 분석할 수 있습니다. 클라이언트가 `X-Request-ID` 헤더를 보내지 않으면 서버가 UUID를 생성하고 응답 헤더로 돌려줍니다.
 
-기본 설정에서는 대화 원문을 저장하지 않으며 `user_id`와 `conversation_id`도 salt가 적용된 해시로 기록합니다. 운영 환경에서는 반드시 충분히 긴 임의의 `LOG_HASH_SALT`를 지정하세요. 원문이 꼭 필요한 제한된 개발 환경에서만 다음 값을 사용합니다.
+기본 설정에서는 대화 원문을 저장하지 않으며 `user_id`와 `conversation_id`도 salt가 적용된 해시로 기록합니다. 운영 환경에서는 `ADMIN_API_TOKEN`에서 안정적인 로그 해시 salt를 자동 파생합니다. 원문이 꼭 필요한 제한된 개발 환경에서만 다음 값을 사용합니다.
 
 ```dotenv
 LOG_INCLUDE_CONTENT=true
