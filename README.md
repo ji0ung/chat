@@ -46,6 +46,16 @@ ALLOWED_ORIGINS=https://your-project.vercel.app,http://localhost:3000,http://127
 
 Render 무료 정적 사이트는 화면 확인용으로 적합합니다. FastAPI Web Service는 계정·지역·시점에 따라 결제 수단 등록을 요구할 수 있고, 무료 인스턴스는 일정 시간 요청이 없으면 절전 상태가 됩니다. 현재 Blueprint API는 OpenRouter 무료 모델과 로컬 Sentence Transformers 임베딩을 사용하도록 설정했으며, SQLite는 재시작·재배포 시 데이터가 유지되지 않을 수 있으므로 장기기억 운영 전에는 Postgres/pgvector로 교체해야 합니다.
 
+### 최신 커밋 동기화
+
+Render 서비스의 Settings → Deploy Hook에서 URL을 만든 뒤 GitHub 저장소의 Actions secrets에 `RENDER_DEPLOY_HOOK_URL`로 저장하세요. 이후 `main` 브랜치 push마다 `.github/workflows/render-deploy.yml`이 배포를 요청합니다. 로컬 수동 실행은 다음과 같습니다.
+
+```bash
+RENDER_DEPLOY_HOOK_URL='https://api.render.com/deploy/srv-...' ./scripts/render-sync.sh
+```
+
+Deploy Hook URL은 비밀번호처럼 취급하고 코드에 직접 커밋하지 않습니다.
+
 ## 처리 흐름
 
 1. 새 사용자 메시지를 임베딩합니다.
