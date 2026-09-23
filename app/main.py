@@ -252,6 +252,7 @@ def health() -> dict[str, str]:
 
 
 @app.get("/auth/validate")
+@app.get("/auth/check")
 def validate_access(
     authorization: str | None = Header(default=None),
 ) -> dict[str, str]:
