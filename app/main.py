@@ -1,0 +1,188 @@
+from __future__ import annotations
+
+from functools import lru_cache
+from time import perf_counter
+from uuid import uuid4
+
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+from openai import OpenAI
+from pydantic import BaseModel, Field
+
+from app.config import Settings
+from app.memory import MemoryService, build_character_prompt
+from app.observability import PrivacyFilter, configure_logging, log_event, request_id_var
+from app.services import OpenAIChatGenerator, OpenAIEmbedder
+from app.store import SQLiteMemoryStore
+
+settings = Settings()
+logger = configure_logging(settings)
+privacy = PrivacyFilter(settings)
+app = FastAPI(title="Character Chat Long-term Memory MVP", version="0.2.0")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=list(settings.allowed_origins),
+    allow_credentials=False,
+    allow_methods=["GET", "POST"],
+    allow_headers=["Content-Type"],
+)
+
+
+@app.middleware("http")
+async def request_logging(request: Request, call_next):
+    request_id = request.headers.get("X-Request-ID", str(uuid4()))[:128]
+    token = request_id_var.set(request_id)
+    started = perf_counter()
+    try:
+        response = await call_next(request)
+        response.headers["X-Request-ID"] = request_id
+        log_event(
+            logger,
+            "http_request_completed",
+            method=request.method,
+            path=request.url.path,
+            status_code=response.status_code,
+            duration_ms=round((perf_counter() - started) * 1000, 2),
+        )
+        return response
+    except Exception:
+        logger.exception(
+            "http_request_failed",
+            extra={
+                "event": "http_request_failed",
+                "fields": {
+                    "method": request.method,
+                    "path": request.url.path,
+                    "duration_ms": round((perf_counter() - started) * 1000, 2),
+                },
+            },
+        )
+        raise
+    finally:
+        request_id_var.reset(token)
+
+
+class MessageRequest(BaseModel):
+    user_id: str
+    conversation_id: str
+    message: str = Field(min_length=1)
+    character_prompt: str = "너는 다정하고 일관된 가상 캐릭터다. 한국어로 자연스럽게 답한다."
+    importance: float = Field(default=0.5, ge=0, le=1)
+
+
+class MemoryResult(BaseModel):
+    id: int
+    content: str
+    score: float
+    similarity: float
+    importance: float
+    recency: float
+    frequency: float
+
+
+class ChatResponse(BaseModel):
+    answer: str
+    recalled_memories: list[MemoryResult]
+
+
+@lru_cache
+def dependencies() -> tuple[MemoryService, OpenAIChatGenerator]:
+    client = OpenAI()
+    store = SQLiteMemoryStore(settings.db_path)
+    memory = MemoryService(
+        store,
+        OpenAIEmbedder(client, settings.embedding_model),
+        top_k=settings.top_k,
+        candidate_limit=settings.candidate_limit,
+        half_life_days=settings.half_life_days,
+    )
+    return memory, OpenAIChatGenerator(client, settings.chat_model)
+
+
+@app.get("/health")
+def health() -> dict[str, str]:
+    return {"status": "ok"}
+
+
+@app.post("/chat", response_model=ChatResponse)
+def chat(request: MessageRequest) -> ChatResponse:
+    memory, generator = dependencies()
+    user_ref = privacy.hash_identifier(request.user_id)
+    conversation_ref = privacy.hash_identifier(request.conversation_id)
+    started = perf_counter()
+    log_event(
+        logger,
+        "chat_received",
+        user_ref=user_ref,
+        conversation_ref=conversation_ref,
+        importance=request.importance,
+        **privacy.text_fields(request.message),
+    )
+
+    recall_started = perf_counter()
+    recalled = memory.recall(user_id=request.user_id, query=request.message)
+    log_event(
+        logger,
+        "memory_recalled",
+        user_ref=user_ref,
+        conversation_ref=conversation_ref,
+        duration_ms=round((perf_counter() - recall_started) * 1000, 2),
+        result_count=len(recalled),
+        results=[
+            {
+                "memory_id": item.memory.id,
+                "score": round(item.score, 4),
+                "similarity": round(item.similarity, 4),
+                "importance": round(item.importance, 4),
+                "recency": round(item.recency, 4),
+                "frequency": round(item.frequency, 4),
+                **privacy.text_fields(item.memory.content, "memory"),
+            }
+            for item in recalled
+        ],
+    )
+    prompt = build_character_prompt(request.character_prompt, recalled)
+    generation_started = perf_counter()
+    answer = generator.generate(prompt, request.message)
+    generation_ms = round((perf_counter() - generation_started) * 1000, 2)
+
+    # The user turn and generated reply both become future retrieval candidates.
+    memory.remember(
+        user_id=request.user_id,
+        conversation_id=request.conversation_id,
+        role="user",
+        content=request.message,
+        importance=request.importance,
+    )
+    memory.remember(
+        user_id=request.user_id,
+        conversation_id=request.conversation_id,
+        role="assistant",
+        content=answer,
+        importance=max(0.3, request.importance * 0.8),
+    )
+    log_event(
+        logger,
+        "chat_completed",
+        user_ref=user_ref,
+        conversation_ref=conversation_ref,
+        total_duration_ms=round((perf_counter() - started) * 1000, 2),
+        generation_duration_ms=generation_ms,
+        recalled_count=len(recalled),
+        **privacy.text_fields(answer, "answer"),
+    )
+    return ChatResponse(
+        answer=answer,
+        recalled_memories=[
+            MemoryResult(
+                id=item.memory.id,
+                content=item.memory.content,
+                score=item.score,
+                similarity=item.similarity,
+                importance=item.importance,
+                recency=item.recency,
+                frequency=item.frequency,
+            )
+            for item in recalled
+        ],
+    )
