@@ -24,6 +24,10 @@ const logs=[
 ];
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const apiBase=()=>localStorage.getItem("luna_api_url")||"https://chat-7bf4.onrender.com";
+const adminTokenInput=$("#adminToken");
+adminTokenInput.value=sessionStorage.getItem("luna_admin_token")||"";
+const adminHeaders=()=>adminTokenInput.value.trim()?{"X-Admin-Token":adminTokenInput.value.trim()}:{};
+$("#saveAdminToken").addEventListener("click",()=>{sessionStorage.setItem("luna_admin_token",adminTokenInput.value.trim());toast("관리자 토큰을 현재 탭에 저장했습니다");loadOverview();});
 function toast(text){const el=$("#toast");el.textContent=text;el.classList.add("show");setTimeout(()=>el.classList.remove("show"),2200)}
 function status(value){return `<span class="status ${value==="점검"?"warn":""}">${value}</span>`}
 function renderRows(items,target,compact=false){$(target).innerHTML=items.map(c=>compact?`<tr><td class="id">${c.id}</td><td>${c.character}</td><td class="persona">${c.persona}</td><td>${c.policy}</td><td>${c.last}</td><td>${status(c.status)}</td></tr>`:`<tr><td class="id">${c.id}</td><td>${c.user}</td><td>${c.character}</td><td class="persona">${c.persona}</td><td>${c.policy}</td><td>${c.messages}</td><td>${status(c.status)}</td></tr>`).join("")}
@@ -35,8 +39,8 @@ function relativeTime(value){const seconds=Math.max(0,(Date.now()-new Date(value
 async function loadOverview(){
   $(".last-sync").textContent="동기화 중…";
   try{
-    const response=await fetch(`${apiBase()}/admin/overview`);
-    if(!response.ok)throw new Error(`요청 실패 (${response.status})`);
+    const response=await fetch(`${apiBase()}/admin/overview`,{headers:adminHeaders()});
+    if(!response.ok){const body=await response.json().catch(()=>({}));throw new Error(body?.detail?.message||`요청 실패 (${response.status})`);}
     const data=await response.json();
     $("#metricConversations").textContent=data.conversation_count.toLocaleString();
     $("#metricMemories").textContent=data.memory_count.toLocaleString();
