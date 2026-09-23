@@ -235,3 +235,15 @@ User ──< Conversation >── Character ──> PersonaVersion
 - `429`: 요청 제한 초과
 - `500`: 내부 처리 실패
 
+
+## 세션 평가
+
+대화가 끝날 때 5개 항목을 1~5점과 한 줄 메모로 저장합니다.
+
+`POST /evaluations`
+
+```json
+{"conversation_id":"...","user_id":"...","memory_recall":4,"natural_use":3,"no_false_memory":5,"character_consistency":4,"relationship_continuity":4,"note":"민초 기억은 잘했는데 과거 이야기를 갑자기 꺼내 어색함"}
+```
+
+`GET /evaluations?limit=100`은 평가 목록과 전체 평균을 반환합니다.
