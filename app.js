@@ -1,31 +1,26 @@
 const $ = (selector) => document.querySelector(selector);
+const DEFAULT_API_URL = "https://chat-7bf4.onrender.com";
 const elements = {
   form: $("#chatForm"), input: $("#messageInput"), messages: $("#messages"),
-  send: $("#sendButton"), accessToken: $("#accessToken"), accessGate: $("#accessGate"),
-  accessForm: $("#accessForm"), accessError: $("#accessError"), prompt: $("#characterPrompt"),
+  send: $("#sendButton"), prompt: $("#characterPrompt"),
   importance: $("#importance"), importanceValue: $("#importanceValue"),
   memoryList: $("#memoryList"), memoryPanel: $("#memoryPanel"),
-  statusDot: $("#statusDot"), connectionText: $("#connectionText"), toast: $("#toast")
+  statusDot: $("#statusDot"), connectionText: $("#connectionText"), toast: $("#toast"),
+  accessGate: $("#accessGate"), accessToken: $("#accessToken"), unlock: $("#unlockButton"),
+  accessError: $("#accessError"), chatControls: $("#chatControls")
 };
 
-const DEFAULT_API_BASE = "https://chat-7bf4.onrender.com";
-let accessGranted = false;
-elements.accessToken.value = sessionStorage.getItem("luna_access_token") || "";
 let conversationId = crypto.randomUUID();
 const userIdKey = "luna_user_id_v2";
 const userId = localStorage.getItem(userIdKey) || crypto.randomUUID();
 localStorage.setItem(userIdKey, userId);
 
-const evaluationItems = [["memory_recall","기억을 잘했나"],["natural_use","기억을 자연스럽게 썼나"],["no_false_memory","틀린 기억을 말하지 않았나"],["character_consistency","캐릭터 말투/성격이 유지됐나"],["relationship_continuity","진짜 관계가 이어지는 느낌이 났나"]];
-const evaluationDialog = $("#evaluationDialog");
-$("#evaluationFields").innerHTML = evaluationItems.map(([key,label]) => `<label>${label}<select name="${key}" required><option value="">점수 선택</option>${[1,2,3,4,5].map(n=>`<option value="${n}">${n}점</option>`).join("")}</select></label>`).join("");
-
 function apiBase() {
-  return (localStorage.getItem("luna_api_url") || DEFAULT_API_BASE).replace(/\/$/, "");
+  return (localStorage.getItem("luna_api_url") || DEFAULT_API_URL).replace(/\/$/, "");
 }
 function authHeaders() {
-  const token = elements.accessToken.value.trim();
-  return token ? { "Authorization": `Bearer ${token}` } : {};
+  const token = sessionStorage.getItem("luna_access_token") || "";
+  return token ? { Authorization: `Bearer ${token}` } : {};
 }
 function now() { return new Intl.DateTimeFormat("ko", { hour: "numeric", minute: "2-digit" }).format(new Date()); }
 function showToast(text) { elements.toast.textContent = text; elements.toast.classList.add("show"); setTimeout(() => elements.toast.classList.remove("show"), 2200); }
@@ -37,58 +32,61 @@ async function responseError(response) {
   return `요청 실패 (${response.status})`;
 }
 
-function setAccessState(granted, message = "") {
-  accessGranted = granted;
-  elements.accessGate.classList.toggle("hidden", granted);
-  elements.statusDot.className = granted ? "status-dot ok" : "status-dot";
-  elements.connectionText.textContent = granted ? "테스트 접근 인증됨" : "액세스 코드가 필요합니다";
-  elements.send.disabled = !granted;
-  elements.input.disabled = !granted;
-  $("#evaluateButton").disabled = !granted;
-  $("#newChat").disabled = !granted;
-  if (!granted && message) elements.accessError.textContent = message;
+function setLocked(message = "") {
+  sessionStorage.removeItem("luna_access_token");
+  elements.chatControls.hidden = true;
+  elements.accessGate.hidden = false;
+  elements.statusDot.className = "status-dot";
+  elements.connectionText.textContent = "테스트 액세스 코드가 필요합니다";
+  elements.accessError.textContent = message;
+  elements.accessToken.focus();
 }
 
-async function validateAccess() {
-  const token = elements.accessToken.value.trim();
+function setUnlocked() {
+  elements.accessGate.hidden = true;
+  elements.chatControls.hidden = false;
+  elements.statusDot.className = "status-dot ok";
+  elements.connectionText.textContent = "테스트 사용자 인증됨";
+  elements.accessError.textContent = "";
+  elements.input.focus();
+}
+
+async function verifyAccessCode(code, { quiet = false } = {}) {
+  const token = (code || "").trim();
   if (!token) {
-    setAccessState(false, "액세스 코드를 입력해주세요.");
+    if (!quiet) setLocked("테스트 액세스 코드를 입력해주세요.");
     return false;
   }
-  elements.accessError.textContent = "확인 중…";
-  $("#accessButton").disabled = true;
   try {
-    const response = await fetch(`${apiBase()}/auth/validate`, { headers: authHeaders() });
+    const response = await fetch(`${apiBase()}/auth/check`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
     if (!response.ok) throw new Error(await responseError(response));
     sessionStorage.setItem("luna_access_token", token);
-    elements.accessError.textContent = "";
-    setAccessState(true);
-    showToast("테스트 접근이 인증됐습니다");
-    elements.input.focus();
+    setUnlocked();
+    if (!quiet) showToast("테스트 액세스 코드가 확인됐습니다");
     return true;
   } catch (error) {
-    sessionStorage.removeItem("luna_access_token");
-    setAccessState(false, error.message || "액세스 코드를 확인해주세요.");
+    setLocked(error.message || "유효하지 않은 테스트 액세스 코드예요.");
     return false;
-  } finally {
-    $("#accessButton").disabled = false;
   }
 }
 
-function requireAccess() {
-  if (accessGranted) return true;
-  setAccessState(false, "먼저 테스트 액세스 코드를 인증해주세요.");
-  elements.accessToken.focus();
-  return false;
-}
+elements.unlock.addEventListener("click", () => verifyAccessCode(elements.accessToken.value));
+elements.accessToken.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    verifyAccessCode(elements.accessToken.value);
+  }
+});
 
+const evaluationItems = [["memory_recall","기억을 잘했나"],["natural_use","기억을 자연스럽게 썼나"],["no_false_memory","틀린 기억을 말하지 않았나"],["character_consistency","캐릭터 말투/성격이 유지됐나"],["relationship_continuity","진짜 관계가 이어지는 느낌이 났나"]];
+const evaluationDialog = $("#evaluationDialog");
+$("#evaluationFields").innerHTML = evaluationItems.map(([key,label]) => `<label>${label}<select name="${key}" required><option value="">점수 선택</option>${[1,2,3,4,5].map(n=>`<option value="${n}">${n}점</option>`).join("")}</select></label>`).join("");
+$("#evaluateButton").addEventListener("click", () => evaluationDialog.showModal());
 $("#cancelEvaluation").addEventListener("click", () => evaluationDialog.close());
-$("#evaluateButton").addEventListener("click", () => { if (requireAccess()) evaluationDialog.showModal(); });
-elements.accessForm.addEventListener("submit", async (event) => { event.preventDefault(); await validateAccess(); });
-
 $("#evaluationForm").addEventListener("submit", async (event) => {
   event.preventDefault();
-  if (!requireAccess()) return;
   const form = new FormData(event.currentTarget);
   const payload = {conversation_id: conversationId, user_id: userId, note: form.get("note") || $("#evaluationNote").value};
   evaluationItems.forEach(([key]) => payload[key] = Number(form.get(key)));
@@ -98,12 +96,14 @@ $("#evaluationForm").addEventListener("submit", async (event) => {
       headers:{"Content-Type":"application/json", ...authHeaders()},
       body:JSON.stringify(payload)
     });
-    if(!res.ok) throw new Error(await responseError(res));
+    if(!res.ok) {
+      if (res.status === 401) setLocked("액세스 코드가 만료되었거나 유효하지 않습니다.");
+      throw new Error(await responseError(res));
+    }
     evaluationDialog.close();
     event.currentTarget.reset();
     showToast("세션 평가를 저장했습니다");
   } catch (error) {
-    if (error.message.includes("로그인") || error.message.includes("권한")) setAccessState(false, error.message);
     showToast(error.message || "평가 저장에 실패했습니다");
   }
 });
@@ -145,7 +145,7 @@ function renderMemories(memories) {
 
 elements.form.addEventListener("submit", async (event) => {
   event.preventDefault();
-  if (!requireAccess()) return;
+  if (elements.chatControls.hidden) return;
   const message = elements.input.value.trim();
   if (!message || elements.send.disabled) return;
   if (message.length > 4000) {
@@ -177,33 +177,39 @@ elements.form.addEventListener("submit", async (event) => {
         importance: Number(elements.importance.value)
       })
     });
-    if (!response.ok) throw new Error(await responseError(response));
+    if (!response.ok) {
+      if (response.status === 401) setLocked("액세스 코드가 만료되었거나 유효하지 않습니다.");
+      throw new Error(await responseError(response));
+    }
     const data = await response.json();
     loading.remove();
     addMessage("assistant", data.answer);
     renderMemories(data.recalled_memories || []);
   } catch (error) {
     loading.remove();
-    if (error.message.includes("로그인") || error.message.includes("권한")) setAccessState(false, error.message);
-    else addMessage("assistant", error.message || "답변을 만드는 중 문제가 발생했어. 다시 시도해줘.");
+    addMessage("assistant", error.message || "답변을 만드는 중 문제가 발생했어. 다시 시도해줘.");
   } finally {
-    elements.send.disabled = !accessGranted;
-    if (accessGranted) elements.input.focus();
+    elements.send.disabled = false;
+    if (!elements.chatControls.hidden) elements.input.focus();
   }
 });
 
 elements.input.addEventListener("keydown", (event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); elements.form.requestSubmit(); } });
 elements.input.addEventListener("input", () => { elements.input.style.height = "auto"; elements.input.style.height = `${elements.input.scrollHeight}px`; });
 elements.importance.addEventListener("input", () => elements.importanceValue.textContent = Number(elements.importance.value).toFixed(1));
-$("#memoryToggle").addEventListener("click", () => { if (requireAccess()) elements.memoryPanel.classList.add("open"); });
+$("#memoryToggle").addEventListener("click", () => elements.memoryPanel.classList.add("open"));
 $("#closeMemory").addEventListener("click", () => elements.memoryPanel.classList.remove("open"));
 $("#newChat").addEventListener("click", () => {
-  if (!requireAccess()) return;
   conversationId = crypto.randomUUID();
   document.querySelectorAll(".message").forEach((node) => node.remove());
   addMessage("assistant", "새로운 이야기를 시작해 볼까? 이번에도 잘 기억해 둘게.");
   renderMemories([]);
 });
 
-setAccessState(false);
-if (elements.accessToken.value.trim()) validateAccess();
+const savedToken = sessionStorage.getItem("luna_access_token");
+if (savedToken) {
+  elements.accessToken.value = savedToken;
+  verifyAccessCode(savedToken, { quiet: true });
+} else {
+  setLocked();
+}
