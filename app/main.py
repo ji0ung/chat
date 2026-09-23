@@ -144,6 +144,11 @@ def dependencies() -> tuple[MemoryService, OpenAIChatGenerator]:
     return memory, generator
 
 
+@lru_cache
+def memory_store() -> SQLiteMemoryStore:
+    return SQLiteMemoryStore(settings.db_path)
+
+
 @app.get("/health")
 def health() -> dict[str, str]:
     return {
@@ -252,5 +257,4 @@ def get_evaluations(limit: int = 100) -> dict[str, object]:
 
 @app.get("/admin/overview")
 def admin_overview() -> dict[str, object]:
-    memory, _ = dependencies()
-    return memory.store.admin_overview()
+    return memory_store().admin_overview()
