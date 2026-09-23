@@ -87,10 +87,13 @@ def looks_like_memory_command(text: str) -> bool:
 def should_store_as_memory(text: str) -> bool:
     compact = re.sub(r"\s+", "", text)
     low_signal = {
-        "ㅇ", "응", "예", "네", "아", "ㅋ", "ㅋㅋ", "ㅋㅋㅋ", "ㅎㅎ", "ㅠㅠ",
-        "뭔소리야", "뭐야", "뭐해", "잘자", "그래", "ㅇㅇ",
+        "ㅇ", "응", "예", "네", "아", "뭔소리야", "뭐야", "뭐해", "잘자", "그래", "ㅇㅇ",
     }
     if len(compact) < 2 or compact in low_signal:
+        return False
+    if re.fullmatch(r"[ㅋㅎㅠㅜ]+", compact):
+        return False
+    if re.fullmatch(r"[!?.,~…]+", compact):
         return False
     if looks_like_prompt_injection(text) or looks_like_memory_command(text):
         return False
