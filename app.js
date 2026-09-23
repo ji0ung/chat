@@ -19,7 +19,7 @@ function apiBase() {
   return (localStorage.getItem("luna_api_url") || DEFAULT_API_URL).replace(/\/$/, "");
 }
 function authHeaders() {
-  const token = sessionStorage.getItem("luna_access_token") || "";
+  const token = sessionStorage.getItem("luna_app_access_token") || "";
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 function now() { return new Intl.DateTimeFormat("ko", { hour: "numeric", minute: "2-digit" }).format(new Date()); }
@@ -33,11 +33,11 @@ async function responseError(response) {
 }
 
 function setLocked(message = "") {
-  sessionStorage.removeItem("luna_access_token");
+  sessionStorage.removeItem("luna_app_access_token");
   elements.chatControls.hidden = true;
   elements.accessGate.hidden = false;
   elements.statusDot.className = "status-dot";
-  elements.connectionText.textContent = "관리자에게 받은 액세스 코드가 필요합니다";
+  elements.connectionText.textContent = "앱 액세스 코드가 필요합니다";
   elements.accessError.textContent = message;
   elements.accessToken.focus();
 }
@@ -46,7 +46,7 @@ function setUnlocked() {
   elements.accessGate.hidden = true;
   elements.chatControls.hidden = false;
   elements.statusDot.className = "status-dot ok";
-  elements.connectionText.textContent = "테스트 사용자 인증됨";
+  elements.connectionText.textContent = "액세스 인증됨";
   elements.accessError.textContent = "";
   elements.input.focus();
 }
@@ -54,7 +54,7 @@ function setUnlocked() {
 async function verifyAccessCode(code, { quiet = false } = {}) {
   const token = (code || "").trim();
   if (!token) {
-    if (!quiet) setLocked("관리자에게 받은 액세스 코드만 입력해주세요. 전체 MVP_ACCESS_TOKENS 값이나 :user-id는 입력하지 않습니다.");
+    if (!quiet) setLocked("앱 액세스 코드를 입력해주세요.");
     return false;
   }
   try {
@@ -62,12 +62,12 @@ async function verifyAccessCode(code, { quiet = false } = {}) {
       headers: { Authorization: `Bearer ${token}` }
     });
     if (!response.ok) throw new Error(await responseError(response));
-    sessionStorage.setItem("luna_access_token", token);
+    sessionStorage.setItem("luna_app_access_token", token);
     setUnlocked();
-    if (!quiet) showToast("테스트 액세스 코드가 확인됐습니다");
+    if (!quiet) showToast("액세스 코드가 확인됐습니다");
     return true;
   } catch (error) {
-    setLocked(error.message || "유효하지 않은 액세스 코드예요. 관리자에게 받은 코드만 입력했는지 확인해주세요.");
+    setLocked(error.message || "액세스 코드가 올바르지 않습니다.");
     return false;
   }
 }
@@ -206,7 +206,7 @@ $("#newChat").addEventListener("click", () => {
   renderMemories([]);
 });
 
-const savedToken = sessionStorage.getItem("luna_access_token");
+const savedToken = sessionStorage.getItem("luna_app_access_token");
 if (savedToken) {
   elements.accessToken.value = savedToken;
   verifyAccessCode(savedToken, { quiet: true });
