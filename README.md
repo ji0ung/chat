@@ -76,6 +76,51 @@ uvicorn app.main:app --reload
 
 API 문서는 `http://127.0.0.1:8000/docs`에서 확인할 수 있습니다.
 
+## 무료 로컬 실험 모드
+
+공유 대화에서 제안한 무료 실험 방식은 로컬 Ollama를 사용하거나, 임베딩만 로컬 Sentence Transformers로 바꾸는 것입니다. `.env`에서 공급자를 선택합니다.
+
+### Ollama로 임베딩·LLM 모두 실행
+
+Ollama를 설치한 뒤 모델을 한 번만 받습니다.
+
+```bash
+ollama pull qwen2.5:3b
+ollama pull nomic-embed-text
+```
+
+`.env`:
+
+```dotenv
+LLM_PROVIDER=ollama
+EMBEDDING_PROVIDER=ollama
+OLLAMA_CHAT_MODEL=qwen2.5:3b
+OLLAMA_EMBEDDING_MODEL=nomic-embed-text
+```
+
+Ollama가 `http://127.0.0.1:11434`에서 실행 중이면 API 비용 없이 반복 대화를 테스트할 수 있습니다.
+
+### 임베딩만 로컬로 실행
+
+```dotenv
+LLM_PROVIDER=openai
+EMBEDDING_PROVIDER=local
+LOCAL_EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
+```
+
+한국어 품질을 평가할 때는 MiniLM 하나만 믿지 말고 다국어·한국어 임베딩 모델을 비교군으로 추가하세요.
+
+### OpenRouter 무료 모델 비교군
+
+```dotenv
+LLM_PROVIDER=openrouter
+OPENROUTER_API_KEY=your-key
+OPENROUTER_MODEL=openrouter/free
+EMBEDDING_PROVIDER=local
+```
+
+무료 모델 목록과 제공량은 바뀔 수 있으므로 장기 운영 비용을 0원으로 가정하지 말고, 로컬 Ollama를 주 실험군으로 두는 편이 안전합니다.
+
 ## 사용 예시
 
 첫 대화를 저장합니다.

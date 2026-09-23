@@ -12,7 +12,13 @@ from pydantic import BaseModel, Field
 from app.config import Settings
 from app.memory import MemoryService, build_character_prompt
 from app.observability import PrivacyFilter, configure_logging, log_event, request_id_var
-from app.services import OpenAIChatGenerator, OpenAIEmbedder
+from app.services import (
+    LocalSentenceTransformerEmbedder,
+    OllamaChatGenerator,
+    OllamaEmbedder,
+    OpenAIChatGenerator,
+    OpenAIEmbedder,
+)
 from app.store import SQLiteMemoryStore
 
 settings = Settings()
@@ -88,20 +94,49 @@ class ChatResponse(BaseModel):
 @lru_cache
 def dependencies() -> tuple[MemoryService, OpenAIChatGenerator]:
     client = OpenAI()
+    if settings.embedding_provider == "ollama":
+        embedder = OllamaEmbedder(settings.ollama_base_url, settings.ollama_embedding_model)
+    elif settings.embedding_provider == "local":
+        embedder = LocalSentenceTransformerEmbedder(settings.local_embedding_model)
+    elif settings.embedding_provider == "openai":
+        embedder = OpenAIEmbedder(client, settings.embedding_model)
+    else:
+        raise ValueError(f"Unsupported EMBEDDING_PROVIDER: {settings.embedding_provider}")
+
+    if settings.llm_provider == "ollama":
+        generator = OllamaChatGenerator(settings.ollama_base_url, settings.ollama_chat_model)
+    elif settings.llm_provider == "openrouter":
+        if not settings.openrouter_api_key:
+            raise RuntimeError("OPENROUTER_API_KEY is required when LLM_PROVIDER=openrouter")
+        router_client = OpenAI(
+            api_key=settings.openrouter_api_key,
+            base_url="https://openrouter.ai/api/v1",
+            default_headers={"HTTP-Referer": "http://localhost", "X-Title": "Luna Memory"},
+        )
+        generator = OpenAIChatGenerator(router_client, settings.openrouter_model)
+    elif settings.llm_provider == "openai":
+        generator = OpenAIChatGenerator(client, settings.chat_model)
+    else:
+        raise ValueError(f"Unsupported LLM_PROVIDER: {settings.llm_provider}")
+
     store = SQLiteMemoryStore(settings.db_path)
     memory = MemoryService(
         store,
-        OpenAIEmbedder(client, settings.embedding_model),
+        embedder,
         top_k=settings.top_k,
         candidate_limit=settings.candidate_limit,
         half_life_days=settings.half_life_days,
     )
-    return memory, OpenAIChatGenerator(client, settings.chat_model)
+    return memory, generator
 
 
 @app.get("/health")
 def health() -> dict[str, str]:
-    return {"status": "ok"}
+    return {
+        "status": "ok",
+        "llm_provider": settings.llm_provider,
+        "embedding_provider": settings.embedding_provider,
+    }
 
 
 @app.post("/chat", response_model=ChatResponse)
