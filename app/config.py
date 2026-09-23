@@ -18,6 +18,7 @@ class Settings:
     ollama_chat_model: str = os.getenv("OLLAMA_CHAT_MODEL", "qwen2.5:3b")
     ollama_embedding_model: str = os.getenv("OLLAMA_EMBEDDING_MODEL", "nomic-embed-text")
     local_embedding_model: str = os.getenv("LOCAL_EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
+    hash_embedding_dimensions: int = int(os.getenv("HASH_EMBEDDING_DIMENSIONS", "384"))
     openrouter_api_key: str | None = os.getenv("OPENROUTER_API_KEY")
     openrouter_model: str = os.getenv("OPENROUTER_MODEL", "openrouter/free")
     db_path: str = os.getenv("MEMORY_DB_PATH", "data/memories.db")

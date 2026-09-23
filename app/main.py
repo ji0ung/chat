@@ -13,6 +13,7 @@ from app.config import Settings
 from app.memory import MemoryService, build_character_prompt
 from app.observability import PrivacyFilter, configure_logging, log_event, request_id_var
 from app.services import (
+    HashingEmbedder,
     LocalSentenceTransformerEmbedder,
     OllamaChatGenerator,
     OllamaEmbedder,
@@ -108,7 +109,9 @@ def dependencies() -> tuple[MemoryService, OpenAIChatGenerator]:
         client = OpenAI()
     if settings.embedding_provider == "ollama":
         embedder = OllamaEmbedder(settings.ollama_base_url, settings.ollama_embedding_model)
-    elif settings.embedding_provider == "local":
+    elif settings.embedding_provider in {"hash", "local"}:
+        embedder = HashingEmbedder(settings.hash_embedding_dimensions)
+    elif settings.embedding_provider in {"sentence-transformer", "sentence_transformer"}:
         embedder = LocalSentenceTransformerEmbedder(settings.local_embedding_model)
     elif settings.embedding_provider == "openai":
         assert client is not None

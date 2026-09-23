@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 from typing import Protocol
+import hashlib
 import json
+import math
+import re
 from urllib.request import Request, urlopen
 
 from openai import OpenAI
@@ -13,6 +16,36 @@ class Embedder(Protocol):
 
 class ChatGenerator(Protocol):
     def generate(self, system_prompt: str, user_message: str) -> str: ...
+
+
+class HashingEmbedder:
+    """Small dependency-free embedder for free-tier MVP deployments.
+
+    It is less semantic than a transformer model, but stable, fast, and enough
+    to test the memory pipeline end to end before paying for hosted embeddings.
+    """
+
+    def __init__(self, dimensions: int = 384) -> None:
+        self.dimensions = dimensions
+
+    def embed(self, text: str) -> list[float]:
+        vector = [0.0] * self.dimensions
+        for feature in self._features(text):
+            digest = hashlib.blake2b(feature.encode("utf-8"), digest_size=8).digest()
+            bucket = int.from_bytes(digest[:4], "big") % self.dimensions
+            sign = 1.0 if digest[4] % 2 == 0 else -1.0
+            vector[bucket] += sign
+        norm = math.sqrt(sum(value * value for value in vector))
+        return [value / norm for value in vector] if norm else vector
+
+    def _features(self, text: str) -> list[str]:
+        normalized = re.sub(r"\s+", " ", text.lower()).strip()
+        words = re.findall(r"[\w가-힣]+", normalized)
+        features = words[:]
+        compact = normalized.replace(" ", "")
+        features.extend(compact[index : index + 2] for index in range(max(0, len(compact) - 1)))
+        features.extend(compact[index : index + 3] for index in range(max(0, len(compact) - 2)))
+        return features or [normalized]
 
 
 class OpenAIEmbedder:
