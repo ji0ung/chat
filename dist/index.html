@@ -67,6 +67,7 @@
             </button>
           </div>
           <p class="hint">Enter로 전송 · Shift + Enter로 줄바꿈</p>
+          <button id="evaluateButton" class="evaluate-button" type="button">세션 평가하기 · 1~5점</button>
         </form>
       </main>
 
@@ -79,6 +80,7 @@
       </aside>
     </div>
     <div id="toast" class="toast" role="status"></div>
+    <dialog id="evaluationDialog" class="evaluation-dialog"><form method="dialog" id="evaluationForm"><h2>이번 대화 평가</h2><p>세션을 끝내며 5개 항목을 1~5점으로 남겨주세요.</p><div id="evaluationFields"></div><label>한 줄 메모<textarea id="evaluationNote" maxlength="500" placeholder="예: 민초 기억은 잘했는데 갑자기 과거 얘기를 꺼내서 어색함"></textarea></label><div class="dialog-actions"><button value="cancel" type="button" id="cancelEvaluation">취소</button><button class="primary" type="submit">평가 저장</button></div></form></dialog>
     <script src="/app.js" defer></script>
   </body>
 </html>

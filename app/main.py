@@ -90,6 +90,16 @@ class ChatResponse(BaseModel):
     answer: str
     recalled_memories: list[MemoryResult]
 
+class EvaluationRequest(BaseModel):
+    conversation_id: str
+    user_id: str = "anonymous"
+    memory_recall: int = Field(ge=1, le=5)
+    natural_use: int = Field(ge=1, le=5)
+    no_false_memory: int = Field(ge=1, le=5)
+    character_consistency: int = Field(ge=1, le=5)
+    relationship_continuity: int = Field(ge=1, le=5)
+    note: str = Field(default="", max_length=500)
+
 
 @lru_cache
 def dependencies() -> tuple[MemoryService, OpenAIChatGenerator]:
@@ -221,3 +231,17 @@ def chat(request: MessageRequest) -> ChatResponse:
             for item in recalled
         ],
     )
+
+@app.post("/evaluations")
+def create_evaluation(request: EvaluationRequest) -> dict[str, int | str]:
+    memory, _ = dependencies()
+    evaluation_id = memory.store.add_evaluation(**request.model_dump())
+    log_event(logger, "session_evaluated", conversation_ref=privacy.hash_identifier(request.conversation_id), evaluation_id=evaluation_id)
+    return {"id": evaluation_id, "status": "saved"}
+
+@app.get("/evaluations")
+def get_evaluations(limit: int = 100) -> dict[str, object]:
+    memory, _ = dependencies()
+    items = memory.store.list_evaluations(max(1, min(limit, 500)))
+    scores = [sum(item[key] for key in ("memory_recall", "natural_use", "no_false_memory", "character_consistency", "relationship_continuity")) / 5 for item in items]
+    return {"items": items, "count": len(items), "average": round(sum(scores) / len(scores), 2) if scores else None}

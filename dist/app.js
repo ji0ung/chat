@@ -12,6 +12,12 @@ if (storedApiUrl) elements.apiUrl.value = storedApiUrl;
 let conversationId = crypto.randomUUID();
 const userId = localStorage.getItem("luna_user_id") || crypto.randomUUID();
 localStorage.setItem("luna_user_id", userId);
+const evaluationItems = [["memory_recall","기억을 잘했나"],["natural_use","기억을 자연스럽게 썼나"],["no_false_memory","틀린 기억을 말하지 않았나"],["character_consistency","캐릭터 말투/성격이 유지됐나"],["relationship_continuity","진짜 관계가 이어지는 느낌이 났나"]];
+const evaluationDialog = $("#evaluationDialog");
+$("#evaluationFields").innerHTML = evaluationItems.map(([key,label]) => `<label>${label}<select name="${key}" required><option value="">점수 선택</option>${[1,2,3,4,5].map(n=>`<option value="${n}">${n}점</option>`).join("")}</select></label>`).join("");
+$("#evaluateButton").addEventListener("click", () => evaluationDialog.showModal());
+$("#cancelEvaluation").addEventListener("click", () => evaluationDialog.close());
+$("#evaluationForm").addEventListener("submit", async (event) => { event.preventDefault(); const form = new FormData(event.currentTarget); const payload = {conversation_id: conversationId, user_id: userId, note: form.get("note") || $("#evaluationNote").value}; evaluationItems.forEach(([key]) => payload[key] = Number(form.get(key))); try { const res = await fetch(`${apiBase()}/evaluations`, {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(payload)}); if(!res.ok) throw new Error(); evaluationDialog.close(); event.currentTarget.reset(); showToast("세션 평가를 저장했습니다"); } catch { showToast("평가 저장에 실패했습니다"); }});
 
 function apiBase() { return elements.apiUrl.value.trim().replace(/\/$/, ""); }
 function now() { return new Intl.DateTimeFormat("ko", { hour: "numeric", minute: "2-digit" }).format(new Date()); }

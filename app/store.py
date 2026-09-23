@@ -59,6 +59,27 @@ class SQLiteMemoryStore:
             conn.execute(
                 "CREATE INDEX IF NOT EXISTS idx_memories_user ON memories(user_id, id DESC)"
             )
+            conn.execute("""CREATE TABLE IF NOT EXISTS session_evaluations (
+                id INTEGER PRIMARY KEY AUTOINCREMENT, conversation_id TEXT NOT NULL,
+                user_id TEXT NOT NULL, memory_recall INTEGER NOT NULL,
+                natural_use INTEGER NOT NULL, no_false_memory INTEGER NOT NULL,
+                character_consistency INTEGER NOT NULL, relationship_continuity INTEGER NOT NULL,
+                note TEXT NOT NULL DEFAULT '', created_at TEXT NOT NULL
+            )""")
+
+    def add_evaluation(self, **values: object) -> int:
+        now = _utcnow().isoformat()
+        fields = ("conversation_id", "user_id", "memory_recall", "natural_use", "no_false_memory",
+                  "character_consistency", "relationship_continuity", "note")
+        with self._connect() as conn:
+            cur = conn.execute("INSERT INTO session_evaluations (" + ",".join(fields) + ",created_at) VALUES (?,?,?,?,?,?,?,?,?)",
+                [values[field] for field in fields] + [now])
+            return int(cur.lastrowid)
+
+    def list_evaluations(self, limit: int = 100) -> list[dict]:
+        with self._connect() as conn:
+            rows = conn.execute("SELECT * FROM session_evaluations ORDER BY id DESC LIMIT ?", (limit,)).fetchall()
+        return [dict(row) for row in rows]
 
     def add(
         self,
