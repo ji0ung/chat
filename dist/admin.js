@@ -23,12 +23,31 @@ const logs=[
  ["memory_recalled","req_a99c…","모아 · 임계값 미달 · 결과 없음","31ms"]
 ];
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const apiBase=()=>localStorage.getItem("luna_api_url")||"https://chat-7bf4.onrender.com";
 function toast(text){const el=$("#toast");el.textContent=text;el.classList.add("show");setTimeout(()=>el.classList.remove("show"),2200)}
 function status(value){return `<span class="status ${value==="점검"?"warn":""}">${value}</span>`}
 function renderRows(items,target,compact=false){$(target).innerHTML=items.map(c=>compact?`<tr><td class="id">${c.id}</td><td>${c.character}</td><td class="persona">${c.persona}</td><td>${c.policy}</td><td>${c.last}</td><td>${status(c.status)}</td></tr>`:`<tr><td class="id">${c.id}</td><td>${c.user}</td><td>${c.character}</td><td class="persona">${c.persona}</td><td>${c.policy}</td><td>${c.messages}</td><td>${status(c.status)}</td></tr>`).join("")}
 renderRows(conversations.slice(0,4),"#recentConversationRows",true);renderRows(conversations,"#conversationRows");
 $("#characterGrid").innerHTML=characters.map(c=>`<article class="character-card"><div class="character-top"><span class="character-avatar">${c.initial}</span><div><h3>${c.name}</h3><small>${c.desc}</small></div></div><div class="character-stats"><div><span>활성 채팅</span><strong>${c.chats}</strong></div><div><span>검색 성공률</span><strong>${c.success}</strong></div></div><div class="card-binding"><span>현재 연결</span><strong>${c.persona}</strong> · ${c.policy}</div></article>`).join("");
 $("#logList").innerHTML=logs.map(l=>`<div class="log-row"><div><span class="event">${l[0]}</span></div><span class="request">${l[1]}</span><span class="log-summary">${l[2]}</span><span class="duration">${l[3]}</span></div>`).join("");
+
+function relativeTime(value){const seconds=Math.max(0,(Date.now()-new Date(value).getTime())/1000);if(seconds<60)return "방금";if(seconds<3600)return `${Math.floor(seconds/60)}분 전`;if(seconds<86400)return `${Math.floor(seconds/3600)}시간 전`;return `${Math.floor(seconds/86400)}일 전`}
+async function loadOverview(){
+  $(".last-sync").textContent="동기화 중…";
+  try{
+    const response=await fetch(`${apiBase()}/admin/overview`);
+    if(!response.ok)throw new Error(`요청 실패 (${response.status})`);
+    const data=await response.json();
+    $("#metricConversations").textContent=data.conversation_count.toLocaleString();
+    $("#metricMemories").textContent=data.memory_count.toLocaleString();
+    $("#metricUsers").textContent=data.user_count.toLocaleString();
+    $("#metricEvaluation").textContent=data.evaluation_average===null?"-":`${data.evaluation_average.toFixed(1)}`;
+    $("#metricEvaluationCount").textContent=`${data.evaluation_count}건`;
+    const live=(data.conversations||[]).map(c=>({id:c.conversation_id.slice(0,12),user:`${c.user_id.slice(0,8)}…`,character:"루나",persona:"현재 프롬프트",policy:"Memory MVP",messages:c.messages,last:relativeTime(c.last_activity),status:"활성"}));
+    renderRows(live.slice(0,4),"#recentConversationRows",true);renderRows(live,"#conversationRows");
+    $(".last-sync").textContent="마지막 동기화 · 방금";
+  }catch(error){$(".last-sync").textContent="동기화 실패";toast(`운영 데이터 로드 실패: ${error.message}`)}
+}
 const titles={overview:"운영 현황",characters:"캐릭터",conversations:"연결된 채팅",policy:"기억 감도",logs:"검색 로그"};
 function showView(name){$$('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.view===name));$$('.view').forEach(v=>v.classList.toggle('active',v.id===`view-${name}`));$("#pageTitle").textContent=titles[name];history.replaceState(null,"",`#${name}`)}
 $$('.nav-item').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.view)));$$('[data-jump]').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.jump)));
@@ -43,5 +62,6 @@ renderExperiment();
 $("#runSimulation").addEventListener('click',()=>{renderExperiment();toast('실험 정책으로 다시 계산했습니다')});$("#queryRun").addEventListener('click',()=>{renderExperiment();toast('테스트 메시지를 분석했습니다')});
 $("#conversationSearch").addEventListener('input',e=>{const q=e.target.value.toLowerCase();renderRows(conversations.filter(c=>Object.values(c).some(v=>String(v).toLowerCase().includes(q))),"#conversationRows")});
 $("#newPersonaButton").addEventListener('click',()=>$("#personaDialog").showModal());$("#saveDraft").addEventListener('click',()=>setTimeout(()=>toast('페르소나 초안을 저장했습니다'),0));
-$("#refreshButton").addEventListener('click',()=>toast('운영 지표를 새로고침했습니다'));$("#publishButton").addEventListener('click',()=>toast('API 연결 후 발행할 수 있습니다'));
+$("#refreshButton").addEventListener('click',()=>loadOverview());$("#publishButton").addEventListener('click',()=>toast('설정 발행 기능은 다음 단계에서 연결됩니다'));
 const hash=location.hash.slice(1);if(titles[hash])showView(hash);
+loadOverview();

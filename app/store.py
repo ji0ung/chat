@@ -81,6 +81,37 @@ class SQLiteMemoryStore:
             rows = conn.execute("SELECT * FROM session_evaluations ORDER BY id DESC LIMIT ?", (limit,)).fetchall()
         return [dict(row) for row in rows]
 
+    def admin_overview(self) -> dict:
+        with self._connect() as conn:
+            totals = conn.execute("""
+                SELECT COUNT(*) AS memories,
+                       COUNT(DISTINCT conversation_id) AS conversations,
+                       COUNT(DISTINCT user_id) AS users,
+                       COALESCE(AVG(importance), 0) AS avg_importance
+                FROM memories
+            """).fetchone()
+            conversations = conn.execute("""
+                SELECT conversation_id, user_id, COUNT(*) AS messages,
+                       MAX(created_at) AS last_activity
+                FROM memories GROUP BY conversation_id, user_id
+                ORDER BY last_activity DESC LIMIT 20
+            """).fetchall()
+            evaluation = conn.execute("""
+                SELECT COUNT(*) AS count,
+                       AVG((memory_recall + natural_use + no_false_memory +
+                            character_consistency + relationship_continuity) / 5.0) AS average
+                FROM session_evaluations
+            """).fetchone()
+        return {
+            "memory_count": totals["memories"],
+            "conversation_count": totals["conversations"],
+            "user_count": totals["users"],
+            "average_importance": round(totals["avg_importance"], 2),
+            "evaluation_count": evaluation["count"],
+            "evaluation_average": round(evaluation["average"], 2) if evaluation["average"] is not None else None,
+            "conversations": [dict(row) for row in conversations],
+        }
+
     def add(
         self,
         *,

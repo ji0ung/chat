@@ -34,12 +34,12 @@
         </header>
 
         <section class="view active" id="view-overview">
-          <div class="notice"><span>i</span><p><strong>현재는 운영 UI 미리보기입니다.</strong> 실제 데이터 저장·수정은 관리자 API 연결 후 활성화됩니다.</p></div>
+          <div class="notice"><span>i</span><p><strong>실시간 운영 데이터입니다.</strong> Render API에 저장된 기억·대화·세션 평가를 표시합니다.</p></div>
           <div class="metrics">
-            <article><div class="metric-label">활성 채팅 <span>지난 24시간</span></div><strong>1,284</strong><p class="up">↑ 12.4%</p></article>
-            <article><div class="metric-label">기억 검색 성공률 <span>Top 5</span></div><strong>87.6%</strong><p class="up">↑ 2.1%</p></article>
-            <article><div class="metric-label">평균 검색 시간 <span>P50</span></div><strong>42<span>ms</span></strong><p class="down">↓ 8ms</p></article>
-            <article><div class="metric-label">기억 미검색 <span>임계값 미달</span></div><strong>8.3%</strong><p>106건</p></article>
+            <article><div class="metric-label">대화 세션 <span>누적</span></div><strong id="metricConversations">-</strong><p>실데이터</p></article>
+            <article><div class="metric-label">저장된 기억 <span>메시지</span></div><strong id="metricMemories">-</strong><p>실데이터</p></article>
+            <article><div class="metric-label">세션 평가 평균 <span>5점 만점</span></div><strong id="metricEvaluation">-</strong><p id="metricEvaluationCount">0건</p></article>
+            <article><div class="metric-label">사용자 <span>익명 ID</span></div><strong id="metricUsers">-</strong><p>실데이터</p></article>
           </div>
 
           <div class="grid-two">

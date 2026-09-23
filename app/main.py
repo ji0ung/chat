@@ -249,3 +249,8 @@ def get_evaluations(limit: int = 100) -> dict[str, object]:
     items = memory.store.list_evaluations(max(1, min(limit, 500)))
     scores = [sum(item[key] for key in ("memory_recall", "natural_use", "no_false_memory", "character_consistency", "relationship_continuity")) / 5 for item in items]
     return {"items": items, "count": len(items), "average": round(sum(scores) / len(scores), 2) if scores else None}
+
+@app.get("/admin/overview")
+def admin_overview() -> dict[str, object]:
+    memory, _ = dependencies()
+    return memory.store.admin_overview()
