@@ -56,6 +56,28 @@ RENDER_DEPLOY_HOOK_URL='https://api.render.com/deploy/srv-...' ./scripts/render-
 
 Deploy Hook URL은 비밀번호처럼 취급하고 코드에 직접 커밋하지 않습니다.
 
+
+## 외부 공유 전 보안 설정
+
+Render 같은 외부 환경에서는 `APP_ENV=production`으로 실행합니다. 이 모드에서는 아래 값이 없거나 안전하지 않으면 서버가 시작되지 않습니다.
+
+```dotenv
+APP_ENV=production
+MVP_ACCESS_TOKENS=friend-code-1:user-1,friend-code-2:user-2
+ADMIN_API_TOKEN=충분히-긴-관리자-비밀값
+LOG_HASH_SALT=충분히-긴-랜덤-salt
+ALLOWED_ORIGINS=https://luna-memory-web.onrender.com
+LOG_INCLUDE_CONTENT=false
+```
+
+- `MVP_ACCESS_TOKENS`: `액세스코드:user_id` 형식이며 여러 명은 쉼표로 구분합니다. 공유 사용자에게는 액세스 코드만 전달합니다.
+- `ADMIN_API_TOKEN`: 운영 콘솔에서 사용하는 별도 관리자 비밀값입니다. 일반 사용자에게 공유하지 않습니다.
+- `LOG_HASH_SALT`: 로그의 사용자 식별자 해시에만 사용하는 랜덤 비밀값입니다.
+- 프론트의 액세스 코드와 관리자 토큰은 `sessionStorage`에만 저장되어 브라우저 탭을 닫으면 사라집니다.
+- 실제 서비스 로그인으로 확장할 때는 이 MVP 토큰 방식을 JWT/서버 세션으로 교체하세요.
+
+Render Dashboard의 API 서비스 → Environment에서 위 세 값을 직접 넣어야 합니다. 비밀값은 GitHub에 커밋하지 않습니다.
+
 ## 처리 흐름
 
 1. 새 사용자 메시지를 임베딩합니다.
