@@ -9,20 +9,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-def _parse_access_tokens(raw: str) -> dict[str, str]:
-    """Parse MVP_ACCESS_TOKENS as token:user_id pairs separated by commas."""
-    result: dict[str, str] = {}
-    for item in raw.split(","):
-        item = item.strip()
-        if not item or ":" not in item:
-            continue
-        token, user_id = item.split(":", 1)
-        token, user_id = token.strip(), user_id.strip()
-        if token and user_id:
-            result[token] = user_id
-    return result
-
-
 @dataclass(frozen=True)
 class Settings:
     app_env: str = os.getenv("APP_ENV", "development").lower()
@@ -42,7 +28,7 @@ class Settings:
     candidate_limit: int = int(os.getenv("MEMORY_CANDIDATE_LIMIT", "20"))
     half_life_days: float = float(os.getenv("MEMORY_HALF_LIFE_DAYS", "30"))
 
-    access_tokens: dict[str, str] = None  # type: ignore[assignment]
+    app_access_token: str | None = os.getenv("APP_ACCESS_TOKEN")
     admin_api_token: str | None = os.getenv("ADMIN_API_TOKEN")
     rate_limit_per_minute: int = int(os.getenv("RATE_LIMIT_PER_MINUTE", "20"))
     ip_rate_limit_per_minute: int = int(os.getenv("IP_RATE_LIMIT_PER_MINUTE", "60"))
@@ -67,11 +53,6 @@ class Settings:
     log_hash_salt: str | None = os.getenv("LOG_HASH_SALT")
 
     def __post_init__(self) -> None:
-        object.__setattr__(
-            self,
-            "access_tokens",
-            _parse_access_tokens(os.getenv("MVP_ACCESS_TOKENS", "")),
-        )
         if not self.log_hash_salt:
             seed = self.admin_api_token or "development-admin-token"
             derived = hashlib.sha256(f"luna-log-salt:{seed}".encode()).hexdigest()
@@ -79,8 +60,8 @@ class Settings:
 
         if self.app_env == "production":
             problems: list[str] = []
-            if not self.access_tokens:
-                problems.append("MVP_ACCESS_TOKENS must contain at least one token:user_id pair")
+            if not self.app_access_token or len(self.app_access_token) < 16:
+                problems.append("APP_ACCESS_TOKEN must be set and at least 16 characters")
             if not self.admin_api_token or len(self.admin_api_token) < 16:
                 problems.append("ADMIN_API_TOKEN must be set and at least 16 characters")
             if not self.allowed_origins or "*" in self.allowed_origins:
