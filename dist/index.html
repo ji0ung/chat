@@ -54,10 +54,6 @@
 
         <form id="chatForm" class="composer">
           <div id="accessGate" class="access-gate">
-            <div class="access-copy">
-              <strong>테스트 액세스 코드</strong>
-              <span>공유받은 코드를 입력하면 대화창이 열립니다.</span>
-            </div>
             <div class="input-row access-row">
               <input id="accessToken" type="password" autocomplete="off" placeholder="테스트 액세스 코드 입력" />
               <button id="unlockButton" type="button">입장</button>
@@ -80,18 +76,6 @@
           </div>
         </form>
 
-        <section id="accessGate" class="access-gate" aria-labelledby="accessGateTitle">
-          <form id="accessForm" class="access-card">
-            <div class="brand-mark access-mark"><span></span><span></span><span></span></div>
-            <p class="eyebrow">PRIVATE TEST</p>
-            <h2 id="accessGateTitle">테스트 액세스 코드</h2>
-            <p>공유받은 코드를 입력하면 루나와 대화를 시작할 수 있어요.</p>
-            <label class="field-label" for="accessToken">액세스 코드</label>
-            <input id="accessToken" type="password" autocomplete="off" placeholder="액세스 코드 입력" required />
-            <button id="accessButton" class="access-button" type="submit">입장하기</button>
-            <p id="accessError" class="access-error" role="alert"></p>
-          </form>
-        </section>
       </main>
 
       <aside id="memoryPanel" class="memory-panel">
