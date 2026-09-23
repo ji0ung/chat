@@ -21,7 +21,7 @@ let conversationId = localStorage.getItem(conversationIdKey) || crypto.randomUUI
 localStorage.setItem(conversationIdKey, conversationId);
 
 const characterPromptKey = "luna_character_prompt_v1";
-const systemRulesKey = "luna_system_rules_v1";
+const systemRulesKey = "luna_system_rules_v2";
 
 function loadCharacterSettings() {
   const savedPrompt = localStorage.getItem(characterPromptKey);
