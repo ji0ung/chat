@@ -2,7 +2,8 @@ const $ = (selector) => document.querySelector(selector);
 const DEFAULT_API_URL = "https://chat-7bf4.onrender.com";
 const elements = {
   form: $("#chatForm"), input: $("#messageInput"), messages: $("#messages"),
-  send: $("#sendButton"), prompt: $("#characterPrompt"),
+  send: $("#sendButton"), prompt: $("#characterPrompt"), systemRules: $("#systemRules"),
+  saveCharacterSettings: $("#saveCharacterSettings"), settingsSaved: $("#settingsSaved"),
   importance: $("#importance"), importanceValue: $("#importanceValue"),
   memoryList: $("#memoryList"), memoryPanel: $("#memoryPanel"),
   statusDot: $("#statusDot"), connectionText: $("#connectionText"), toast: $("#toast"),
@@ -14,6 +15,26 @@ let conversationId = crypto.randomUUID();
 const userIdKey = "luna_user_id_v2";
 const userId = localStorage.getItem(userIdKey) || crypto.randomUUID();
 localStorage.setItem(userIdKey, userId);
+
+const characterPromptKey = "luna_character_prompt_v1";
+const systemRulesKey = "luna_system_rules_v1";
+
+function loadCharacterSettings() {
+  const savedPrompt = localStorage.getItem(characterPromptKey);
+  const savedRules = localStorage.getItem(systemRulesKey);
+  if (savedPrompt !== null) elements.prompt.value = savedPrompt;
+  if (savedRules !== null) elements.systemRules.value = savedRules;
+}
+
+function saveCharacterSettings() {
+  localStorage.setItem(characterPromptKey, elements.prompt.value);
+  localStorage.setItem(systemRulesKey, elements.systemRules.value);
+  elements.settingsSaved.textContent = "저장됨";
+  showToast("캐릭터 설정을 저장했습니다");
+  setTimeout(() => {
+    elements.settingsSaved.textContent = "";
+  }, 1800);
+}
 
 function apiBase() {
   return (localStorage.getItem("luna_api_url") || DEFAULT_API_URL).replace(/\/$/, "");
@@ -190,7 +211,10 @@ async function sendChatMessage(message, { showUserMessage = true, requestId = cr
     user_id: userId,
     conversation_id: conversationId,
     message,
-    character_prompt: elements.prompt.value.trim(),
+    character_prompt: [
+      elements.prompt.value.trim(),
+      elements.systemRules.value.trim() ? `[추가 시스템 규칙]\n${elements.systemRules.value.trim()}` : ""
+    ].filter(Boolean).join("\n\n"),
     importance: Number(elements.importance.value)
   };
 
@@ -245,6 +269,7 @@ elements.form.addEventListener("submit", async (event) => {
 elements.input.addEventListener("keydown", (event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); elements.form.requestSubmit(); } });
 elements.input.addEventListener("input", () => { elements.input.style.height = "auto"; elements.input.style.height = `${elements.input.scrollHeight}px`; });
 elements.importance.addEventListener("input", () => elements.importanceValue.textContent = Number(elements.importance.value).toFixed(1));
+elements.saveCharacterSettings.addEventListener("click", saveCharacterSettings);
 $("#memoryToggle").addEventListener("click", () => elements.memoryPanel.classList.add("open"));
 $("#closeMemory").addEventListener("click", () => elements.memoryPanel.classList.remove("open"));
 $("#newChat").addEventListener("click", () => {
@@ -253,6 +278,8 @@ $("#newChat").addEventListener("click", () => {
   addMessage("assistant", "새로운 이야기를 시작해 볼까? 이번에도 잘 기억해 둘게.");
   renderMemories([]);
 });
+
+loadCharacterSettings();
 
 const savedToken = sessionStorage.getItem("luna_app_access_token");
 if (savedToken) {
