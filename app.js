@@ -18,11 +18,36 @@ const evaluationDialog = $("#evaluationDialog");
 $("#evaluationFields").innerHTML = evaluationItems.map(([key,label]) => `<label>${label}<select name="${key}" required><option value="">점수 선택</option>${[1,2,3,4,5].map(n=>`<option value="${n}">${n}점</option>`).join("")}</select></label>`).join("");
 $("#evaluateButton").addEventListener("click", () => evaluationDialog.showModal());
 $("#cancelEvaluation").addEventListener("click", () => evaluationDialog.close());
-$("#evaluationForm").addEventListener("submit", async (event) => { event.preventDefault(); const form = new FormData(event.currentTarget); const payload = {conversation_id: conversationId, user_id: userId, note: form.get("note") || $("#evaluationNote").value}; evaluationItems.forEach(([key]) => payload[key] = Number(form.get(key))); try { const res = await fetch(`${apiBase()}/evaluations`, {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(payload)}); if(!res.ok) throw new Error(); evaluationDialog.close(); event.currentTarget.reset(); showToast("세션 평가를 저장했습니다"); } catch { showToast("평가 저장에 실패했습니다"); }});
+$("#evaluationForm").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const form = new FormData(event.currentTarget);
+  const payload = {conversation_id: conversationId, user_id: userId, note: form.get("note") || $("#evaluationNote").value};
+  evaluationItems.forEach(([key]) => payload[key] = Number(form.get(key)));
+  try {
+    const res = await fetch(`${apiBase()}/evaluations`, {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify(payload)
+    });
+    if(!res.ok) throw new Error(await responseError(res));
+    evaluationDialog.close();
+    event.currentTarget.reset();
+    showToast("세션 평가를 저장했습니다");
+  } catch (error) {
+    showToast(error.message || "평가 저장에 실패했습니다");
+  }
+});
 
 function apiBase() { return elements.apiUrl.value.trim().replace(/\/$/, ""); }
 function now() { return new Intl.DateTimeFormat("ko", { hour: "numeric", minute: "2-digit" }).format(new Date()); }
 function showToast(text) { elements.toast.textContent = text; elements.toast.classList.add("show"); setTimeout(() => elements.toast.classList.remove("show"), 2200); }
+
+async function responseError(response) {
+  const data = await response.json().catch(() => ({}));
+  if (typeof data.detail === "string") return data.detail;
+  if (data.detail && typeof data.detail.message === "string") return data.detail.message;
+  return `요청 실패 (${response.status})`;
+}
 
 function addMessage(role, text) {
   const article = document.createElement("article");
@@ -79,26 +104,46 @@ elements.form.addEventListener("submit", async (event) => {
   event.preventDefault();
   const message = elements.input.value.trim();
   if (!message || elements.send.disabled) return;
+  if (message.length > 4000) {
+    showToast("메시지가 너무 길어요. 4,000자 이하로 줄여주세요.");
+    return;
+  }
+
   addMessage("user", message);
   elements.input.value = "";
   elements.input.style.height = "auto";
   elements.send.disabled = true;
   const loading = addLoading();
+  const requestId = crypto.randomUUID();
+
   try {
     const response = await fetch(`${apiBase()}/chat`, {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ user_id: userId, conversation_id: conversationId, message,
-        character_prompt: elements.prompt.value.trim(), importance: Number(elements.importance.value) })
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Request-ID": requestId,
+        "Idempotency-Key": requestId
+      },
+      body: JSON.stringify({
+        user_id: userId,
+        conversation_id: conversationId,
+        message,
+        character_prompt: elements.prompt.value.trim(),
+        importance: Number(elements.importance.value)
+      })
     });
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(data.detail || `요청 실패 (${response.status})`);
+    if (!response.ok) throw new Error(await responseError(response));
+    const data = await response.json();
     loading.remove();
     addMessage("assistant", data.answer);
     renderMemories(data.recalled_memories || []);
   } catch (error) {
     loading.remove();
-    addMessage("assistant", `연결 중 문제가 생겼어. ${error.message}`);
-  } finally { elements.send.disabled = false; elements.input.focus(); }
+    addMessage("assistant", error.message || "답변을 만드는 중 문제가 발생했어. 다시 시도해줘.");
+  } finally {
+    elements.send.disabled = false;
+    elements.input.focus();
+  }
 });
 
 elements.input.addEventListener("keydown", (event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); elements.form.requestSubmit(); } });
