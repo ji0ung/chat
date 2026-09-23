@@ -83,8 +83,9 @@ textarea:focus, input[type="url"]:focus, input[type="password"]:focus { border-c
 
 .connection-copy { margin: 0; color: var(--muted); font-size: 10px; line-height: 1.55; }
 .chat { position: relative; }
-.access-gate { position: absolute; inset: 0; z-index: 15; display: grid; place-items: center; padding: 24px; background: rgba(251,250,248,.96); backdrop-filter: blur(6px); }
-.access-gate.hidden { display: none; }
+.access-gate { display: block; }
+.access-gate[hidden], .chat-controls[hidden] { display: none !important; }
+.chat-controls { display: block; }
 .access-card { width: min(390px, 100%); padding: 28px; border: 1px solid var(--line); border-radius: 18px; background: #fff; box-shadow: 0 24px 70px #39304f1c; }
 .access-card h2 { margin: 8px 0 6px; font-size: 21px; }
 .access-card > p:not(.eyebrow):not(.access-error) { margin: 0 0 20px; color: var(--muted); font-size: 12px; line-height: 1.6; }
