@@ -23,11 +23,15 @@ const logs=[
  ["memory_recalled","req_a99c…","모아 · 임계값 미달 · 결과 없음","31ms"]
 ];
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-const apiBase=()=>localStorage.getItem("luna_api_url")||"https://chat-7bf4.onrender.com";
+const DEFAULT_API_BASE="https://chat-7bf4.onrender.com";
+const apiBase=()=>localStorage.getItem("luna_api_url")||DEFAULT_API_BASE;
 const adminTokenInput=$("#adminToken");
+const adminApiSettings=$("#adminApiSettings");
+const adminApiUrl=$("#adminApiUrl");
 adminTokenInput.value=sessionStorage.getItem("luna_admin_token")||"";
 const adminHeaders=()=>adminTokenInput.value.trim()?{"X-Admin-Token":adminTokenInput.value.trim()}:{};
 $("#saveAdminToken").addEventListener("click",()=>{sessionStorage.setItem("luna_admin_token",adminTokenInput.value.trim());toast("관리자 토큰을 현재 탭에 저장했습니다");loadOverview();});
+$("#saveApiUrl").addEventListener("click",()=>{const value=adminApiUrl.value.trim().replace(/\/$/,"");if(!value)return toast("API 주소를 입력해주세요");localStorage.setItem("luna_api_url",value);toast("백엔드 API 주소를 저장했습니다");loadOverview();});
 function toast(text){const el=$("#toast");el.textContent=text;el.classList.add("show");setTimeout(()=>el.classList.remove("show"),2200)}
 function status(value){return `<span class="status ${value==="점검"?"warn":""}">${value}</span>`}
 function renderRows(items,target,compact=false){$(target).innerHTML=items.map(c=>compact?`<tr><td class="id">${c.id}</td><td>${c.character}</td><td class="persona">${c.persona}</td><td>${c.policy}</td><td>${c.last}</td><td>${status(c.status)}</td></tr>`:`<tr><td class="id">${c.id}</td><td>${c.user}</td><td>${c.character}</td><td class="persona">${c.persona}</td><td>${c.policy}</td><td>${c.messages}</td><td>${status(c.status)}</td></tr>`).join("")}
@@ -42,6 +46,8 @@ async function loadOverview(){
     const response=await fetch(`${apiBase()}/admin/overview`,{headers:adminHeaders()});
     if(!response.ok){const body=await response.json().catch(()=>({}));throw new Error(body?.detail?.message||`요청 실패 (${response.status})`);}
     const data=await response.json();
+    adminApiSettings.hidden=false;
+    adminApiUrl.value=apiBase();
     $("#metricConversations").textContent=data.conversation_count.toLocaleString();
     $("#metricMemories").textContent=data.memory_count.toLocaleString();
     $("#metricUsers").textContent=data.user_count.toLocaleString();
@@ -50,7 +56,7 @@ async function loadOverview(){
     const live=(data.conversations||[]).map(c=>({id:c.conversation_id.slice(0,12),user:`${c.user_id.slice(0,8)}…`,character:"루나",persona:"현재 프롬프트",policy:"Memory MVP",messages:c.messages,last:relativeTime(c.last_activity),status:"활성"}));
     renderRows(live.slice(0,4),"#recentConversationRows",true);renderRows(live,"#conversationRows");
     $(".last-sync").textContent="마지막 동기화 · 방금";
-  }catch(error){$(".last-sync").textContent="동기화 실패";toast(`운영 데이터 로드 실패: ${error.message}`)}
+  }catch(error){adminApiSettings.hidden=true;$(".last-sync").textContent="동기화 실패";toast(`운영 데이터 로드 실패: ${error.message}`)}
 }
 const titles={overview:"운영 현황",characters:"캐릭터",conversations:"연결된 채팅",policy:"기억 감도",logs:"검색 로그"};
 function showView(name){$$('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.view===name));$$('.view').forEach(v=>v.classList.toggle('active',v.id===`view-${name}`));$("#pageTitle").textContent=titles[name];history.replaceState(null,"",`#${name}`)}
