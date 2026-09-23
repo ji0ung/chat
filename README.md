@@ -2,7 +2,7 @@
 
 대화를 임베딩해 사용자별로 저장하고, 새 메시지와 의미가 가까운 기억을 검색한 뒤 캐릭터 시스템 프롬프트에 넣는 최소 예제입니다. 루나와 대화하고 검색된 기억 점수를 확인할 수 있는 반응형 웹 UI도 포함합니다.
 
-상세한 [API 명세](docs/API.md), [어드민·기억 감도 설계](docs/ADMIN.md), [보안 및 입력 Validation 정책](docs/security-input-validation-policy.md)을 함께 제공합니다.
+상세한 [API 명세](docs/API.md), [어드민·기억 감도 설계](docs/ADMIN.md), [보안 및 입력 Validation 정책](docs/security-input-validation-policy.md), [UI 디자인 시스템](docs/design-system.md)을 함께 제공합니다.
 
 ## 화면 실행
 
