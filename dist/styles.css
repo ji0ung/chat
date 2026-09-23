@@ -34,8 +34,8 @@ button { color: inherit; }
 .side-section { display: grid; gap: 8px; }
 .eyebrow { margin: 0; color: #9b95aa; font-size: 10px; font-weight: 700; letter-spacing: .13em; }
 .field-label { font-size: 12px; font-weight: 600; }
-textarea, input[type="url"] { width: 100%; border: 1px solid #dedbe2; border-radius: 10px; background: #fbfaf9; color: var(--ink); outline: none; transition: border .2s, box-shadow .2s; }
-textarea:focus, input[type="url"]:focus { border-color: #9781dc; box-shadow: 0 0 0 3px #7657d614; }
+textarea, input[type="url"], input[type="password"] { width: 100%; border: 1px solid #dedbe2; border-radius: 10px; background: #fbfaf9; color: var(--ink); outline: none; transition: border .2s, box-shadow .2s; }
+textarea:focus, input[type="url"]:focus, input[type="password"]:focus { border-color: #9781dc; box-shadow: 0 0 0 3px #7657d614; }
 #characterPrompt { min-height: 112px; padding: 11px; resize: vertical; font-size: 12px; line-height: 1.65; }
 #apiUrl { padding: 9px 10px; font-size: 11px; }
 .section-title { display: flex; align-items: center; justify-content: space-between; }
@@ -78,3 +78,5 @@ textarea:focus, input[type="url"]:focus { border-color: #9781dc; box-shadow: 0 0
 .evaluate-button { width:100%; margin-top:10px; border:1px solid #d8d2f4; background:#f7f5ff; color:#5741b8; border-radius:10px; padding:10px; cursor:pointer; }
 .evaluation-dialog { border:0; border-radius:18px; padding:24px; width:min(440px, calc(100% - 32px)); box-shadow:0 20px 60px #211b4426; }
 .evaluation-dialog::backdrop { background:#211b4455; }.evaluation-dialog h2 { margin:0 0 6px; }.evaluation-dialog p { color:#747083; }.evaluation-dialog label { display:block; margin:12px 0; font-size:13px; color:#555064; }.evaluation-dialog select,.evaluation-dialog textarea { display:block; width:100%; margin-top:5px; border:1px solid #ddd8ec; border-radius:8px; padding:9px; background:white; }.evaluation-dialog textarea { min-height:70px; }.dialog-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:16px; }.dialog-actions button { border:0; border-radius:8px; padding:9px 14px; cursor:pointer; }
+
+#accessToken { padding: 9px 10px; font-size: 11px; }
