@@ -123,13 +123,48 @@ function addMessage(role, text) {
   return article;
 }
 
-function addLoading() {
+function addLoading(label = "") {
   const article = document.createElement("article");
   article.className = "message assistant loading";
-  article.innerHTML = '<div class="mini-avatar">L</div><div class="bubble"><i></i><i></i><i></i></div>';
+  article.innerHTML = '<div class="mini-avatar">L</div><div class="bubble"><i></i><i></i><i></i><span class="loading-label"></span></div>';
+  article.querySelector(".loading-label").textContent = label;
   elements.messages.append(article);
   elements.messages.scrollTop = elements.messages.scrollHeight;
   return article;
+}
+
+function addRetryMessage(text, retry) {
+  const article = addMessage("assistant", text);
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "retry-button";
+  button.textContent = "다시 시도";
+  button.addEventListener("click", () => {
+    article.remove();
+    retry();
+  }, { once: true });
+  article.querySelector(".bubble").append(button);
+  return article;
+}
+
+async function fetchChatWithTimeout(payload, requestId, timeoutMs = 30000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(`${apiBase()}/chat`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Request-ID": requestId,
+        "Idempotency-Key": requestId,
+        ...authHeaders()
+      },
+      body: JSON.stringify(payload),
+      signal: controller.signal
+    });
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 function renderMemories(memories) {
@@ -147,6 +182,51 @@ function renderMemories(memories) {
   }));
 }
 
+async function sendChatMessage(message, { showUserMessage = true, requestId = crypto.randomUUID() } = {}) {
+  if (showUserMessage) addMessage("user", message);
+  elements.send.disabled = true;
+
+  const payload = {
+    user_id: userId,
+    conversation_id: conversationId,
+    message,
+    character_prompt: elements.prompt.value.trim(),
+    importance: Number(elements.importance.value)
+  };
+
+  let loading = addLoading();
+  let response;
+  try {
+    try {
+      response = await fetchChatWithTimeout(payload, requestId);
+    } catch (error) {
+      if (error.name !== "AbortError") throw error;
+      loading.querySelector(".loading-label").textContent = "응답이 늦어 다시 시도 중…";
+      response = await fetchChatWithTimeout(payload, requestId);
+    }
+
+    if (!response.ok) {
+      if (response.status === 401) setLocked("액세스 코드가 만료되었거나 유효하지 않습니다.");
+      throw new Error(await responseError(response));
+    }
+
+    const data = await response.json();
+    loading.remove();
+    addMessage("assistant", data.answer);
+    renderMemories(data.recalled_memories || []);
+  } catch (error) {
+    loading.remove();
+    const isTimeout = error.name === "AbortError";
+    const messageText = isTimeout
+      ? "응답이 오래 걸리고 있어. 잠시 후 다시 시도해줘."
+      : "연결이 잠깐 불안정해. 다시 시도해줘.";
+    addRetryMessage(messageText, () => sendChatMessage(message, { showUserMessage: false, requestId }));
+  } finally {
+    elements.send.disabled = false;
+    if (!elements.chatControls.hidden) elements.input.focus();
+  }
+}
+
 elements.form.addEventListener("submit", async (event) => {
   event.preventDefault();
   if (elements.chatControls.hidden) return;
@@ -157,45 +237,9 @@ elements.form.addEventListener("submit", async (event) => {
     return;
   }
 
-  addMessage("user", message);
   elements.input.value = "";
   elements.input.style.height = "auto";
-  elements.send.disabled = true;
-  const loading = addLoading();
-  const requestId = crypto.randomUUID();
-
-  try {
-    const response = await fetch(`${apiBase()}/chat`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Request-ID": requestId,
-        "Idempotency-Key": requestId,
-        ...authHeaders()
-      },
-      body: JSON.stringify({
-        user_id: userId,
-        conversation_id: conversationId,
-        message,
-        character_prompt: elements.prompt.value.trim(),
-        importance: Number(elements.importance.value)
-      })
-    });
-    if (!response.ok) {
-      if (response.status === 401) setLocked("액세스 코드가 만료되었거나 유효하지 않습니다.");
-      throw new Error(await responseError(response));
-    }
-    const data = await response.json();
-    loading.remove();
-    addMessage("assistant", data.answer);
-    renderMemories(data.recalled_memories || []);
-  } catch (error) {
-    loading.remove();
-    addMessage("assistant", error.message || "답변을 만드는 중 문제가 발생했어. 다시 시도해줘.");
-  } finally {
-    elements.send.disabled = false;
-    if (!elements.chatControls.hidden) elements.input.focus();
-  }
+  await sendChatMessage(message);
 });
 
 elements.input.addEventListener("keydown", (event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); elements.form.requestSubmit(); } });
