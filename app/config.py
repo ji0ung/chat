@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import os
 from dataclasses import dataclass
 
@@ -63,7 +64,7 @@ class Settings:
     log_max_bytes: int = int(os.getenv("LOG_MAX_BYTES", "10485760"))
     log_backup_count: int = int(os.getenv("LOG_BACKUP_COUNT", "7"))
     log_include_content: bool = os.getenv("LOG_INCLUDE_CONTENT", "false").lower() == "true"
-    log_hash_salt: str = os.getenv("LOG_HASH_SALT", "change-this-in-production")
+    log_hash_salt: str | None = os.getenv("LOG_HASH_SALT")
 
     def __post_init__(self) -> None:
         object.__setattr__(
@@ -71,14 +72,17 @@ class Settings:
             "access_tokens",
             _parse_access_tokens(os.getenv("MVP_ACCESS_TOKENS", "")),
         )
+        if not self.log_hash_salt:
+            seed = self.admin_api_token or "development-admin-token"
+            derived = hashlib.sha256(f"luna-log-salt:{seed}".encode()).hexdigest()
+            object.__setattr__(self, "log_hash_salt", derived)
+
         if self.app_env == "production":
             problems: list[str] = []
             if not self.access_tokens:
                 problems.append("MVP_ACCESS_TOKENS must contain at least one token:user_id pair")
             if not self.admin_api_token or len(self.admin_api_token) < 16:
                 problems.append("ADMIN_API_TOKEN must be set and at least 16 characters")
-            if self.log_hash_salt == "change-this-in-production" or len(self.log_hash_salt) < 16:
-                problems.append("LOG_HASH_SALT must be replaced with a long random secret")
             if not self.allowed_origins or "*" in self.allowed_origins:
                 problems.append("ALLOWED_ORIGINS must list explicit frontend origins")
             if self.log_include_content:
