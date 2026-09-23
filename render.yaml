@@ -6,6 +6,8 @@ services:
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /health
     envVars:
+      - key: APP_ENV
+        value: production
       - key: OPENROUTER_API_KEY
         sync: false
       - key: OPENROUTER_MODEL
@@ -16,6 +18,20 @@ services:
         value: hash
       - key: ALLOWED_ORIGINS
         value: https://luna-memory-web.onrender.com
+      - key: MVP_ACCESS_TOKENS
+        sync: false
+      - key: ADMIN_API_TOKEN
+        sync: false
+      - key: LOG_HASH_SALT
+        sync: false
+      - key: LOG_INCLUDE_CONTENT
+        value: "false"
+      - key: RATE_LIMIT_PER_MINUTE
+        value: "20"
+      - key: IP_RATE_LIMIT_PER_MINUTE
+        value: "60"
+      - key: MESSAGE_MAX_CHARS
+        value: "4000"
       - key: MEMORY_DB_PATH
         value: data/memories.db
       - key: LOG_PATH
