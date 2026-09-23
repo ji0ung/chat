@@ -24,6 +24,7 @@ def _parse_access_tokens(raw: str) -> dict[str, str]:
 
 @dataclass(frozen=True)
 class Settings:
+    app_env: str = os.getenv("APP_ENV", "development").lower()
     chat_model: str = os.getenv("CHAT_MODEL", "gpt-4.1-mini")
     embedding_model: str = os.getenv("EMBEDDING_MODEL", "text-embedding-3-small")
     llm_provider: str = os.getenv("LLM_PROVIDER", "openai").lower()
@@ -40,7 +41,6 @@ class Settings:
     candidate_limit: int = int(os.getenv("MEMORY_CANDIDATE_LIMIT", "20"))
     half_life_days: float = float(os.getenv("MEMORY_HALF_LIFE_DAYS", "30"))
 
-    # MVP security / input policy
     access_tokens: dict[str, str] = None  # type: ignore[assignment]
     admin_api_token: str | None = os.getenv("ADMIN_API_TOKEN")
     rate_limit_per_minute: int = int(os.getenv("RATE_LIMIT_PER_MINUTE", "20"))
@@ -71,3 +71,17 @@ class Settings:
             "access_tokens",
             _parse_access_tokens(os.getenv("MVP_ACCESS_TOKENS", "")),
         )
+        if self.app_env == "production":
+            problems: list[str] = []
+            if not self.access_tokens:
+                problems.append("MVP_ACCESS_TOKENS must contain at least one token:user_id pair")
+            if not self.admin_api_token or len(self.admin_api_token) < 16:
+                problems.append("ADMIN_API_TOKEN must be set and at least 16 characters")
+            if self.log_hash_salt == "change-this-in-production" or len(self.log_hash_salt) < 16:
+                problems.append("LOG_HASH_SALT must be replaced with a long random secret")
+            if not self.allowed_origins or "*" in self.allowed_origins:
+                problems.append("ALLOWED_ORIGINS must list explicit frontend origins")
+            if self.log_include_content:
+                problems.append("LOG_INCLUDE_CONTENT must be false in production")
+            if problems:
+                raise RuntimeError("Unsafe production configuration: " + "; ".join(problems))
