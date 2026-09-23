@@ -22,8 +22,6 @@ services:
         sync: false
       - key: ADMIN_API_TOKEN
         sync: false
-      - key: LOG_HASH_SALT
-        sync: false
       - key: LOG_INCLUDE_CONTENT
         value: "false"
       - key: RATE_LIMIT_PER_MINUTE
