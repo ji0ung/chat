@@ -251,6 +251,17 @@ def health() -> dict[str, str]:
     }
 
 
+@app.get("/auth/validate")
+def validate_access(
+    authorization: str | None = Header(default=None),
+) -> dict[str, str]:
+    user_id = resolve_user_id("development-user", authorization)
+    return {
+        "status": "ok",
+        "user_ref": privacy.hash_identifier(user_id),
+    }
+
+
 @app.post("/chat", response_model=ChatResponse)
 def chat(
     payload: MessageRequest,
