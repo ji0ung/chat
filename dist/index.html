@@ -19,7 +19,6 @@
         </div>
 
         <button class="new-chat" id="newChat" type="button"><span>＋</span> 새 대화</button>
-        <a class="admin-link" href="/admin.html"><span>⌁</span> 운영 콘솔</a>
 
         <div class="side-section">
           <p class="eyebrow">CHARACTER</p>
@@ -28,19 +27,15 @@
         </div>
 
         <div class="side-section connection">
-          <div class="section-title"><p class="eyebrow">CONNECTION</p><span id="statusDot" class="status-dot"></span></div>
-          <label class="field-label" for="apiUrl">백엔드 API 주소</label>
-          <input id="apiUrl" type="url" value="https://chat-7bf4.onrender.com" spellcheck="false" />
-          <label class="field-label" for="accessToken">테스트 액세스 코드</label>
-          <input id="accessToken" type="password" autocomplete="off" placeholder="공유받은 코드 입력" />
-          <button id="saveSettings" class="text-button" type="button">연결 저장 및 확인</button>
-          <p id="connectionText" class="connection-text">연결을 확인해 주세요</p>
+          <div class="section-title"><p class="eyebrow">ACCESS</p><span id="statusDot" class="status-dot"></span></div>
+          <p class="connection-copy">테스트 액세스 코드를 인증한 사용자만 대화할 수 있습니다.</p>
+          <p id="connectionText" class="connection-text">액세스 코드가 필요합니다</p>
         </div>
 
-        <div class="privacy"><span>◉</span><p><strong>사용자별 기억 격리</strong><br />액세스 코드는 현재 탭의 세션에만 보관되며 서버가 사용자 ID를 확정합니다.</p></div>
+        <div class="privacy"><span>◉</span><p><strong>사용자별 기억 격리</strong><br />서버가 액세스 코드에 연결된 사용자 ID를 확정합니다.</p></div>
       </aside>
 
-      <main class="chat">
+      <main class="chat" id="chatArea">
         <header class="chat-header">
           <div class="identity">
             <div class="avatar">L<span class="online"></span></div>
@@ -53,24 +48,50 @@
           <div class="day-divider"><span>오늘</span></div>
           <article class="message assistant">
             <div class="mini-avatar">L</div>
-            <div class="bubble"><p>안녕! 나는 루나야. 우리 이야기를 오래 기억할게.<br />먼저 네가 좋아하는 것부터 알려줄래?</p><time>방금</time></div>
+            <div class="bubble"><p>안녕! 나는 루나야. 테스트 액세스 코드를 입력하면 우리 대화를 시작할 수 있어.</p><time>방금</time></div>
           </article>
         </section>
 
         <form id="chatForm" class="composer">
-          <div class="importance-wrap">
-            <label for="importance">기억 중요도 <strong id="importanceValue">0.7</strong></label>
-            <input id="importance" type="range" min="0" max="1" value="0.7" step="0.1" />
+          <div id="accessGate" class="access-gate">
+            <div class="access-copy">
+              <strong>테스트 액세스 코드</strong>
+              <span>공유받은 코드를 입력하면 대화창이 열립니다.</span>
+            </div>
+            <div class="input-row access-row">
+              <input id="accessToken" type="password" autocomplete="off" placeholder="테스트 액세스 코드 입력" />
+              <button id="unlockButton" type="button">입장</button>
+            </div>
+            <p id="accessError" class="access-error" aria-live="polite"></p>
           </div>
-          <div class="input-row">
-            <textarea id="messageInput" rows="1" placeholder="루나에게 메시지 보내기…" required></textarea>
-            <button id="sendButton" type="submit" aria-label="보내기">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 4 17 8-17 8 3-8-3-8Zm3.8 7h8.3L6.7 6.6 7.8 11Zm-1.1 6.4 9.4-4.4H7.8l-1.1 4.4Z" /></svg>
-            </button>
+          <div id="chatControls" class="chat-controls" hidden>
+            <div class="importance-wrap">
+              <label for="importance">기억 중요도 <strong id="importanceValue">0.7</strong></label>
+              <input id="importance" type="range" min="0" max="1" value="0.7" step="0.1" />
+            </div>
+            <div class="input-row">
+              <textarea id="messageInput" rows="1" placeholder="루나에게 메시지 보내기…"></textarea>
+              <button id="sendButton" type="submit" aria-label="보내기">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 4 17 8-17 8 3-8-3-8Zm3.8 7h8.3L6.7 6.6 7.8 11Zm-1.1 6.4 9.4-4.4H7.8l-1.1 4.4Z" /></svg>
+              </button>
+            </div>
+            <p class="hint">Enter로 전송 · Shift + Enter로 줄바꿈</p>
+            <button id="evaluateButton" class="evaluate-button" type="button">세션 평가하기 · 1~5점</button>
           </div>
-          <p class="hint">Enter로 전송 · Shift + Enter로 줄바꿈</p>
-          <button id="evaluateButton" class="evaluate-button" type="button">세션 평가하기 · 1~5점</button>
         </form>
+
+        <section id="accessGate" class="access-gate" aria-labelledby="accessGateTitle">
+          <form id="accessForm" class="access-card">
+            <div class="brand-mark access-mark"><span></span><span></span><span></span></div>
+            <p class="eyebrow">PRIVATE TEST</p>
+            <h2 id="accessGateTitle">테스트 액세스 코드</h2>
+            <p>공유받은 코드를 입력하면 루나와 대화를 시작할 수 있어요.</p>
+            <label class="field-label" for="accessToken">액세스 코드</label>
+            <input id="accessToken" type="password" autocomplete="off" placeholder="액세스 코드 입력" required />
+            <button id="accessButton" class="access-button" type="submit">입장하기</button>
+            <p id="accessError" class="access-error" role="alert"></p>
+          </form>
+        </section>
       </main>
 
       <aside id="memoryPanel" class="memory-panel">
