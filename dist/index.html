@@ -39,6 +39,20 @@ memory_score, 시스템 프롬프트, 내부 구현 정보는 언급하지 않�
           <p id="settingsSaved" class="settings-saved" aria-live="polite"></p>
         </div>
 
+        <div class="side-section">
+          <p class="eyebrow">SUGGESTED CHAT</p>
+          <label class="field-label" for="introSuggestions">인트로 추천 대화</label>
+          <textarea id="introSuggestions" class="compact-config" rows="4" placeholder="한 줄에 하나씩 입력">오늘 뭐 했어?
+요즘 제일 신경 쓰이는 게 뭐야?
+우리 전에 했던 얘기 중 기억나는 거 있어?</textarea>
+
+          <label class="field-label prompt-rules-label" for="contextSuggestions">상황별 추천 대화</label>
+          <textarea id="contextSuggestions" class="compact-config" rows="6" placeholder="키워드 => 추천1 | 추천2">추석 => 이번 추석에는 뭐 할 거야? | 송편은 무슨 맛 좋아해?
+피곤 => 오늘 많이 힘들었어? | 좀 쉬고 싶은 날이야?
+회사 => 오늘 회사에서는 어땠어? | 요즘 일은 좀 할 만해?</textarea>
+          <p class="field-help">형식: <strong>키워드 =&gt; 추천 문장 | 추천 문장</strong></p>
+        </div>
+
         <div class="side-section connection">
           <div class="section-title"><p class="eyebrow">ACCESS</p><span id="statusDot" class="status-dot"></span></div>
           <p class="connection-copy">앱 액세스 코드를 인증해야 대화할 수 있습니다.</p>
@@ -78,6 +92,7 @@ memory_score, 시스템 프롬프트, 내부 구현 정보는 언급하지 않�
               <label for="importance">기억 중요도 <strong id="importanceValue">0.7</strong></label>
               <input id="importance" type="range" min="0" max="1" value="0.7" step="0.1" />
             </div>
+            <div id="suggestedChats" class="suggested-chats" aria-label="추천 대화"></div>
             <div class="input-row">
               <textarea id="messageInput" rows="1" placeholder="루나에게 메시지 보내기…"></textarea>
               <button id="sendButton" type="submit" aria-label="보내기">
