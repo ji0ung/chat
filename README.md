@@ -37,15 +37,14 @@ ALLOWED_ORIGINS=https://your-project.vercel.app,http://localhost:3000,http://127
 
 ## Render 무료 배포
 
-저장소에 포함된 `render.yaml`을 사용하면 Render Blueprint에서 정적 프론트와 FastAPI API를 함께 만들 수 있습니다.
+저장소에 포함된 `render.yaml`을 사용하면 Render Blueprint에서 정적 프론트 화면을 무료로 만들 수 있습니다.
 
 1. [Render New Blueprint](https://dashboard.render.com/blueprints/new)에서 GitHub의 `ji0ung/chat` 저장소를 선택합니다.
 2. `render.yaml`을 확인하고 두 서비스를 생성합니다.
-3. API 서비스의 `OPENAI_API_KEY`를 입력합니다.
-4. API 서비스가 생성되면 `ALLOWED_ORIGINS`에 프론트 서비스의 `onrender.com` 주소를 입력합니다.
-5. 프론트 화면 왼쪽의 백엔드 API 주소에 `https://luna-memory-api.onrender.com` 형태의 실제 API 주소를 입력합니다.
+3. 생성된 프론트 서비스의 `onrender.com` 주소를 엽니다.
+4. 프론트 화면 왼쪽의 백엔드 API 주소에는 별도로 배포한 FastAPI URL을 입력합니다.
 
-무료 Web Service는 일정 시간 요청이 없으면 절전 상태가 되어 첫 요청이 느릴 수 있습니다. 또한 현재 SQLite는 무료 인스턴스 재시작·재배포 시 데이터가 유지되지 않을 수 있습니다. 장기기억을 운영 데이터로 사용할 때는 Render Postgres/pgvector로 교체해야 합니다.
+Render 무료 정적 사이트는 화면 확인용으로 적합합니다. FastAPI Web Service는 계정·지역·시점에 따라 결제 수단 등록을 요구할 수 있고, 무료 인스턴스는 일정 시간 요청이 없으면 절전 상태가 됩니다. 현재 SQLite는 재시작·재배포 시 데이터가 유지되지 않을 수 있으므로 장기기억 운영 전에는 Postgres/pgvector로 교체해야 합니다.
 
 ## 처리 흐름
 
