@@ -103,12 +103,15 @@ class EvaluationRequest(BaseModel):
 
 @lru_cache
 def dependencies() -> tuple[MemoryService, OpenAIChatGenerator]:
-    client = OpenAI()
+    client: OpenAI | None = None
+    if settings.embedding_provider == "openai" or settings.llm_provider == "openai":
+        client = OpenAI()
     if settings.embedding_provider == "ollama":
         embedder = OllamaEmbedder(settings.ollama_base_url, settings.ollama_embedding_model)
     elif settings.embedding_provider == "local":
         embedder = LocalSentenceTransformerEmbedder(settings.local_embedding_model)
     elif settings.embedding_provider == "openai":
+        assert client is not None
         embedder = OpenAIEmbedder(client, settings.embedding_model)
     else:
         raise ValueError(f"Unsupported EMBEDDING_PROVIDER: {settings.embedding_provider}")
@@ -125,6 +128,7 @@ def dependencies() -> tuple[MemoryService, OpenAIChatGenerator]:
         )
         generator = OpenAIChatGenerator(router_client, settings.openrouter_model)
     elif settings.llm_provider == "openai":
+        assert client is not None
         generator = OpenAIChatGenerator(client, settings.chat_model)
     else:
         raise ValueError(f"Unsupported LLM_PROVIDER: {settings.llm_provider}")
