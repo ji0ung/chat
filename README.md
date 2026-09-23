@@ -162,3 +162,9 @@ python -m unittest discover -s tests -v
 - 검색 품질 평가셋을 만들어 가중치와 `top_k` 조정
 
 임베딩 생성과 Responses API 호출 형태는 [OpenAI 임베딩 가이드](https://developers.openai.com/api/docs/guides/embeddings) 및 [OpenAI API 빠른 시작](https://developers.openai.com/api/docs/quickstart)을 기준으로 구성했습니다.
+
+## 프로젝트 배경
+
+이 MVP는 AI 캐릭터챗에서 대화 지속과 관계 형성을 만드는 상호작용을 분석하는 개인 데이터 분석 프로젝트의 프로토타입입니다. 핵심 행동 단위는 클릭이나 구매가 아닌 `Conversation Turn`이며, 대화가 진행되면서 관계적 상호작용과 장기기억이 어떻게 나타나는지 탐색합니다.
+
+주요 분석 후보 데이터는 PIPPA(Character.AI 실제 대화 기반 공개 데이터)와 RP-Opus(multi-turn AI companion/roleplay 데이터)입니다. 후속 분석 주제는 Story chat의 몰입과 Character chat의 관계성이 engagement를 만드는 방식의 비교입니다.
