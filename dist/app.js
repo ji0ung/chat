@@ -58,7 +58,7 @@ async function verifyAccessCode(code, { quiet = false } = {}) {
     return false;
   }
   try {
-    const response = await fetch(`${apiBase()}/auth/check`, {
+    const response = await fetch(`${apiBase()}/auth/validate`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     if (!response.ok) throw new Error(await responseError(response));
