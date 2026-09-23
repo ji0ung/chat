@@ -31,11 +31,13 @@
           <div class="section-title"><p class="eyebrow">CONNECTION</p><span id="statusDot" class="status-dot"></span></div>
           <label class="field-label" for="apiUrl">백엔드 API 주소</label>
           <input id="apiUrl" type="url" value="https://chat-7bf4.onrender.com" spellcheck="false" />
+          <label class="field-label" for="accessToken">테스트 액세스 코드</label>
+          <input id="accessToken" type="password" autocomplete="off" placeholder="공유받은 코드 입력" />
           <button id="saveSettings" class="text-button" type="button">연결 저장 및 확인</button>
           <p id="connectionText" class="connection-text">연결을 확인해 주세요</p>
         </div>
 
-        <div class="privacy"><span>◉</span><p><strong>사용자별 기억 격리</strong><br />대화는 지정한 사용자 ID 안에서만 검색됩니다.</p></div>
+        <div class="privacy"><span>◉</span><p><strong>사용자별 기억 격리</strong><br />액세스 코드는 현재 탭의 세션에만 보관되며 서버가 사용자 ID를 확정합니다.</p></div>
       </aside>
 
       <main class="chat">
