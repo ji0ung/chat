@@ -70,7 +70,7 @@ ALLOWED_ORIGINS=https://luna-memory-web.onrender.com
 LOG_INCLUDE_CONTENT=false
 ```
 
-- `MVP_ACCESS_TOKENS`: `액세스코드:user_id` 형식이며 여러 명은 쉼표로 구분합니다. 공유 사용자에게는 액세스 코드만 전달합니다.
+- `MVP_ACCESS_TOKENS`: `액세스코드:user_id` 형식이며 여러 명은 쉼표로 구분합니다. 공유 사용자에게는 **콜론 앞쪽 액세스 코드 하나만** 전달합니다. 프론트 로그인 UI에도 앞쪽 코드만 입력하며 `:user_id`나 전체 환경변수 문자열은 입력하지 않습니다.
 - `ADMIN_API_TOKEN`: 운영 콘솔에서 사용하는 별도 관리자 비밀값입니다. 일반 사용자에게 공유하지 않습니다.
 - `LOG_HASH_SALT`: 로그의 사용자 식별자 해시에만 사용하는 랜덤 비밀값입니다.
 - 프론트의 액세스 코드와 관리자 토큰은 `sessionStorage`에만 저장되어 브라우저 탭을 닫으면 사라집니다.
