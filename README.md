@@ -63,19 +63,19 @@ Render 같은 외부 환경에서는 `APP_ENV=production`으로 실행합니다.
 
 ```dotenv
 APP_ENV=production
-MVP_ACCESS_TOKENS=friend-code-1:user-1,friend-code-2:user-2
+APP_ACCESS_TOKEN=16자-이상의-비공개-접근코드
 ADMIN_API_TOKEN=충분히-긴-관리자-비밀값
 ALLOWED_ORIGINS=https://luna-memory-web.onrender.com
 LOG_INCLUDE_CONTENT=false
 ```
 
-- `MVP_ACCESS_TOKENS`: `액세스코드:user_id` 형식이며 여러 명은 쉼표로 구분합니다. 공유 사용자에게는 **콜론 앞쪽 액세스 코드 하나만** 전달합니다. 프론트 로그인 UI에도 앞쪽 코드만 입력하며 `:user_id`나 전체 환경변수 문자열은 입력하지 않습니다.
+- `APP_ACCESS_TOKEN`: 채팅 입장과 일반 API 호출을 보호하는 하나의 비공개 코드입니다. Render에 설정한 값을 프론트의 액세스 코드 입력창에 그대로 입력합니다.
 - `ADMIN_API_TOKEN`: 운영 콘솔에서 사용하는 별도 관리자 비밀값입니다. 일반 사용자에게 공유하지 않습니다.
 - 로그 사용자 식별자 해시용 salt는 `ADMIN_API_TOKEN`에서 서버가 내부적으로 파생합니다. 별도 `LOG_HASH_SALT` 설정은 필요하지 않습니다.
 - 프론트의 액세스 코드와 관리자 토큰은 `sessionStorage`에만 저장되어 브라우저 탭을 닫으면 사라집니다.
-- 실제 서비스 로그인으로 확장할 때는 이 MVP 토큰 방식을 JWT/서버 세션으로 교체하세요.
+- 실제 서비스 로그인으로 확장할 때는 이 단일 액세스 코드 방식을 JWT/서버 세션으로 교체하세요.
 
-Render Dashboard의 API 서비스 → Environment에서 `MVP_ACCESS_TOKENS`와 `ADMIN_API_TOKEN`을 직접 넣어야 합니다. 비밀값은 GitHub에 커밋하지 않습니다.
+Render Dashboard의 API 서비스 → Environment에서 `APP_ACCESS_TOKEN`과 `ADMIN_API_TOKEN`을 직접 넣습니다. 비밀값은 GitHub에 커밋하지 않습니다.
 
 ## 처리 흐름
 
