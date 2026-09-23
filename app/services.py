@@ -65,12 +65,15 @@ class OpenAIChatGenerator:
         self.model = model
 
     def generate(self, system_prompt: str, user_message: str) -> str:
-        result = self.client.responses.create(
+        result = self.client.chat.completions.create(
             model=self.model,
-            instructions=system_prompt,
-            input=user_message,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_message},
+            ],
+            temperature=0.8,
         )
-        return result.output_text
+        return result.choices[0].message.content or ""
 
 
 class OllamaEmbedder:

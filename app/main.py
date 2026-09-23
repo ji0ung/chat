@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from functools import lru_cache
+import re
 from time import perf_counter
 from uuid import uuid4
 
@@ -102,6 +103,21 @@ class EvaluationRequest(BaseModel):
     note: str = Field(default="", max_length=500)
 
 
+def clean_model_answer(answer: str) -> str:
+    cleaned = re.sub(r"(?im)^\s*(user safety|safety|assistant|system)\s*:\s*.*$", "", answer)
+    cleaned = re.sub(r"<[^>]+>", "", cleaned).strip()
+    odd_ratio = sum(1 for char in cleaned if char in "�□■●○◇◆�") / max(len(cleaned), 1)
+    if not cleaned or odd_ratio > 0.05:
+        return "잠깐, 방금 말이 조금 꼬였어. 다시 자연스럽게 얘기해볼게. 무슨 일이 있었어?"
+    return cleaned
+
+
+def should_store_user_memory(message: str) -> bool:
+    normalized = re.sub(r"\s+", "", message)
+    low_signal = {"ㅇ", "응", "예", "네", "아", "ㅋ", "ㅋㅋ", "ㅎㅎ", "뭔소리야", "뭐야"}
+    return len(normalized) >= 2 and normalized not in low_signal
+
+
 @lru_cache
 def dependencies() -> tuple[MemoryService, OpenAIChatGenerator]:
     client: OpenAI | None = None
@@ -200,24 +216,19 @@ def chat(request: MessageRequest) -> ChatResponse:
     )
     prompt = build_character_prompt(request.character_prompt, recalled)
     generation_started = perf_counter()
-    answer = generator.generate(prompt, request.message)
+    answer = clean_model_answer(generator.generate(prompt, request.message))
     generation_ms = round((perf_counter() - generation_started) * 1000, 2)
 
-    # The user turn and generated reply both become future retrieval candidates.
-    memory.remember(
-        user_id=request.user_id,
-        conversation_id=request.conversation_id,
-        role="user",
-        content=request.message,
-        importance=request.importance,
-    )
-    memory.remember(
-        user_id=request.user_id,
-        conversation_id=request.conversation_id,
-        role="assistant",
-        content=answer,
-        importance=max(0.3, request.importance * 0.8),
-    )
+    # Long-term memory should favor user facts. Assistant replies can amplify
+    # mistakes if they are stored and later retrieved as "memory".
+    if should_store_user_memory(request.message):
+        memory.remember(
+            user_id=request.user_id,
+            conversation_id=request.conversation_id,
+            role="user",
+            content=request.message,
+            importance=request.importance,
+        )
     log_event(
         logger,
         "chat_completed",

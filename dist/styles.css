@@ -47,20 +47,20 @@ textarea:focus, input[type="url"]:focus { border-color: #9781dc; box-shadow: 0 0
 .privacy { display: flex; gap: 9px; margin-top: auto; padding: 12px; border: 1px solid #e0dce8; border-radius: 12px; background: #faf8f6; }
 .privacy > span { color: var(--accent); font-size: 10px; }.privacy p { margin: 0; color: var(--muted); font-size: 10px; line-height: 1.5; }.privacy strong { color: var(--ink); font-weight: 600; }
 
-.chat { min-width: 0; display: grid; grid-template-rows: 78px 1fr auto; background: #fff; }
+.chat { min-width: 0; min-height: 0; height: 100dvh; overflow: hidden; display: grid; grid-template-rows: 78px minmax(0, 1fr) auto; background: #fff; }
 .chat-header { display: flex; align-items: center; justify-content: space-between; padding: 0 30px; border-bottom: 1px solid var(--line); }
 .identity { display: flex; align-items: center; gap: 12px; }.identity h1 { margin: 0; font-size: 16px; }.identity p { margin: 3px 0 0; color: var(--muted); font-size: 11px; }
 .avatar { position: relative; display: grid; place-items: center; width: 42px; height: 42px; border-radius: 15px; background: linear-gradient(145deg, #e6dcfa, #b99fe9); color: #5b3aaa; font-family: Georgia, serif; font-size: 20px; box-shadow: inset 0 0 0 1px #ffffff88; }
 .online { position: absolute; right: -1px; bottom: 1px; width: 10px; height: 10px; border: 2px solid white; border-radius: 50%; background: var(--green); }
 .memory-toggle { display: none; padding: 8px 11px; border: 1px solid var(--line); border-radius: 9px; background: white; font-size: 11px; cursor: pointer; }.memory-toggle span { color: var(--accent); }
-.messages { overflow-y: auto; padding: 24px clamp(22px, 5vw, 72px); scroll-behavior: smooth; }
+.messages { min-height: 0; overflow-y: auto; padding: 24px clamp(22px, 5vw, 72px); scroll-behavior: smooth; }
 .day-divider { display: flex; align-items: center; gap: 12px; margin: 2px 0 26px; color: #aaa6b0; font-size: 10px; }.day-divider::before,.day-divider::after { content: ""; height: 1px; flex: 1; background: #efedf1; }
 .message { display: flex; gap: 10px; margin: 0 0 20px; animation: arrive .28s ease-out; }.message.user { justify-content: flex-end; }.message.user .bubble { order: -1; background: var(--accent); color: white; border-bottom-right-radius: 4px; }.message.user time { color: #e3dafb; }
 .mini-avatar { flex: 0 0 auto; display: grid; place-items: center; width: 28px; height: 28px; margin-top: 4px; border-radius: 10px; background: var(--accent-soft); color: var(--accent-dark); font-family: Georgia, serif; font-size: 13px; }
 .bubble { max-width: min(78%, 560px); padding: 12px 15px 9px; border-radius: 14px; border-bottom-left-radius: 4px; background: #f2f0f5; line-height: 1.65; }
 .bubble p { margin: 0; white-space: pre-wrap; font-size: 13px; }.bubble time { display: block; margin-top: 5px; color: #a19ca9; font-size: 9px; text-align: right; }
 .message.loading .bubble { display: flex; gap: 4px; padding: 16px; }.message.loading i { width: 5px; height: 5px; border-radius: 50%; background: #9889bb; animation: pulse 1s infinite alternate; }.message.loading i:nth-child(2) { animation-delay: .2s; }.message.loading i:nth-child(3) { animation-delay: .4s; }
-.composer { padding: 12px clamp(22px, 5vw, 72px) 18px; border-top: 1px solid var(--line); background: #fff; }
+.composer { position: sticky; bottom: 0; z-index: 2; padding: 12px clamp(22px, 5vw, 72px) 18px; border-top: 1px solid var(--line); background: #fff; }
 .importance-wrap { display: flex; justify-content: flex-end; align-items: center; gap: 9px; margin-bottom: 7px; }.importance-wrap label { color: var(--muted); font-size: 9px; }.importance-wrap strong { color: var(--accent-dark); }.importance-wrap input { width: 90px; accent-color: var(--accent); }
 .input-row { display: flex; align-items: flex-end; gap: 10px; padding: 7px 7px 7px 14px; border: 1px solid #dfdce4; border-radius: 14px; background: #fbfafc; box-shadow: 0 8px 28px #39304f0a; }.input-row:focus-within { border-color: #9b86db; box-shadow: 0 0 0 3px #7657d610; }
 #messageInput { max-height: 130px; padding: 7px 0; border: 0; border-radius: 0; background: transparent; resize: none; line-height: 1.5; font-size: 13px; box-shadow: none; }

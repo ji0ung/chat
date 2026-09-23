@@ -10,8 +10,9 @@ const elements = {
 const storedApiUrl = localStorage.getItem("luna_api_url");
 if (storedApiUrl && !storedApiUrl.includes("luna-memory-api.onrender.com")) elements.apiUrl.value = storedApiUrl;
 let conversationId = crypto.randomUUID();
-const userId = localStorage.getItem("luna_user_id") || crypto.randomUUID();
-localStorage.setItem("luna_user_id", userId);
+const userIdKey = "luna_user_id_v2";
+const userId = localStorage.getItem(userIdKey) || crypto.randomUUID();
+localStorage.setItem(userIdKey, userId);
 const evaluationItems = [["memory_recall","기억을 잘했나"],["natural_use","기억을 자연스럽게 썼나"],["no_false_memory","틀린 기억을 말하지 않았나"],["character_consistency","캐릭터 말투/성격이 유지됐나"],["relationship_continuity","진짜 관계가 이어지는 느낌이 났나"]];
 const evaluationDialog = $("#evaluationDialog");
 $("#evaluationFields").innerHTML = evaluationItems.map(([key,label]) => `<label>${label}<select name="${key}" required><option value="">점수 선택</option>${[1,2,3,4,5].map(n=>`<option value="${n}">${n}점</option>`).join("")}</select></label>`).join("");
