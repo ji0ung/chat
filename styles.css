@@ -80,3 +80,18 @@ textarea:focus, input[type="url"]:focus, input[type="password"]:focus { border-c
 .evaluation-dialog::backdrop { background:#211b4455; }.evaluation-dialog h2 { margin:0 0 6px; }.evaluation-dialog p { color:#747083; }.evaluation-dialog label { display:block; margin:12px 0; font-size:13px; color:#555064; }.evaluation-dialog select,.evaluation-dialog textarea { display:block; width:100%; margin-top:5px; border:1px solid #ddd8ec; border-radius:8px; padding:9px; background:white; }.evaluation-dialog textarea { min-height:70px; }.dialog-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:16px; }.dialog-actions button { border:0; border-radius:8px; padding:9px 14px; cursor:pointer; }
 
 #accessToken { padding: 9px 10px; font-size: 11px; }
+
+.connection-copy { margin: 0; color: var(--muted); font-size: 10px; line-height: 1.55; }
+.chat { position: relative; }
+.access-gate { position: absolute; inset: 0; z-index: 15; display: grid; place-items: center; padding: 24px; background: rgba(251,250,248,.96); backdrop-filter: blur(6px); }
+.access-gate.hidden { display: none; }
+.access-card { width: min(390px, 100%); padding: 28px; border: 1px solid var(--line); border-radius: 18px; background: #fff; box-shadow: 0 24px 70px #39304f1c; }
+.access-card h2 { margin: 8px 0 6px; font-size: 21px; }
+.access-card > p:not(.eyebrow):not(.access-error) { margin: 0 0 20px; color: var(--muted); font-size: 12px; line-height: 1.6; }
+.access-card input { width: 100%; margin-top: 7px; padding: 11px 12px; border: 1px solid #dedbe2; border-radius: 10px; background: #fbfaf9; outline: none; }
+.access-card input:focus { border-color: #9781dc; box-shadow: 0 0 0 3px #7657d614; }
+.access-button { width: 100%; margin-top: 12px; padding: 11px 14px; border: 0; border-radius: 10px; background: var(--accent); color: #fff; font-weight: 700; cursor: pointer; }
+.access-button:disabled { opacity: .55; cursor: wait; }
+.access-error { min-height: 18px; margin: 9px 0 0; color: #c3535b; font-size: 10px; }
+.access-mark { margin-bottom: 18px; }
+button:disabled { opacity: .55; cursor: not-allowed; }
