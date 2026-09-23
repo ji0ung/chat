@@ -8,7 +8,7 @@ const elements = {
 };
 
 const storedApiUrl = localStorage.getItem("luna_api_url");
-if (storedApiUrl) elements.apiUrl.value = storedApiUrl;
+if (storedApiUrl && !storedApiUrl.includes("luna-memory-api.onrender.com")) elements.apiUrl.value = storedApiUrl;
 let conversationId = crypto.randomUUID();
 const userId = localStorage.getItem("luna_user_id") || crypto.randomUUID();
 localStorage.setItem("luna_user_id", userId);
