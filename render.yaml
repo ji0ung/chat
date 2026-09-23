@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: luna-memory-api
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: ALLOWED_ORIGINS
+        sync: false
+      - key: MEMORY_DB_PATH
+        value: data/memories.db
+      - key: LOG_PATH
+        value: logs/character-memory.jsonl
+
+  - type: web
+    name: luna-memory-web
+    runtime: static
+    plan: free
+    buildCommand: echo "Static files ready"
+    staticPublishPath: ./dist
+
