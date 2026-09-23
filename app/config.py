@@ -8,6 +8,20 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
+def _parse_access_tokens(raw: str) -> dict[str, str]:
+    """Parse MVP_ACCESS_TOKENS as token:user_id pairs separated by commas."""
+    result: dict[str, str] = {}
+    for item in raw.split(","):
+        item = item.strip()
+        if not item or ":" not in item:
+            continue
+        token, user_id = item.split(":", 1)
+        token, user_id = token.strip(), user_id.strip()
+        if token and user_id:
+            result[token] = user_id
+    return result
+
+
 @dataclass(frozen=True)
 class Settings:
     chat_model: str = os.getenv("CHAT_MODEL", "gpt-4.1-mini")
@@ -25,6 +39,18 @@ class Settings:
     top_k: int = int(os.getenv("MEMORY_TOP_K", "5"))
     candidate_limit: int = int(os.getenv("MEMORY_CANDIDATE_LIMIT", "20"))
     half_life_days: float = float(os.getenv("MEMORY_HALF_LIFE_DAYS", "30"))
+
+    # MVP security / input policy
+    access_tokens: dict[str, str] = None  # type: ignore[assignment]
+    admin_api_token: str | None = os.getenv("ADMIN_API_TOKEN")
+    rate_limit_per_minute: int = int(os.getenv("RATE_LIMIT_PER_MINUTE", "20"))
+    ip_rate_limit_per_minute: int = int(os.getenv("IP_RATE_LIMIT_PER_MINUTE", "60"))
+    message_max_chars: int = int(os.getenv("MESSAGE_MAX_CHARS", "4000"))
+    message_max_same_char_run: int = int(os.getenv("MESSAGE_MAX_SAME_CHAR_RUN", "100"))
+    message_max_urls: int = int(os.getenv("MESSAGE_MAX_URLS", "10"))
+    replacement_char_ratio: float = float(os.getenv("REPLACEMENT_CHAR_RATIO", "0.20"))
+    idempotency_ttl_seconds: int = int(os.getenv("IDEMPOTENCY_TTL_SECONDS", "300"))
+
     allowed_origins: tuple[str, ...] = tuple(
         origin.strip()
         for origin in os.getenv(
@@ -38,3 +64,10 @@ class Settings:
     log_backup_count: int = int(os.getenv("LOG_BACKUP_COUNT", "7"))
     log_include_content: bool = os.getenv("LOG_INCLUDE_CONTENT", "false").lower() == "true"
     log_hash_salt: str = os.getenv("LOG_HASH_SALT", "change-this-in-production")
+
+    def __post_init__(self) -> None:
+        object.__setattr__(
+            self,
+            "access_tokens",
+            _parse_access_tokens(os.getenv("MVP_ACCESS_TOKENS", "")),
+        )
