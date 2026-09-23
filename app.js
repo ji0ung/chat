@@ -35,7 +35,9 @@ async function responseError(response) {
 function setLocked(message = "") {
   sessionStorage.removeItem("luna_app_access_token");
   elements.chatControls.hidden = true;
+  elements.chatControls.style.display = "none";
   elements.accessGate.hidden = false;
+  elements.accessGate.style.display = "block";
   elements.statusDot.className = "status-dot";
   elements.connectionText.textContent = "앱 액세스 코드가 필요합니다";
   elements.accessError.textContent = message;
@@ -44,7 +46,9 @@ function setLocked(message = "") {
 
 function setUnlocked() {
   elements.accessGate.hidden = true;
+  elements.accessGate.style.display = "none";
   elements.chatControls.hidden = false;
+  elements.chatControls.style.display = "block";
   elements.statusDot.className = "status-dot ok";
   elements.connectionText.textContent = "액세스 인증됨";
   elements.accessError.textContent = "";
