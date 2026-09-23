@@ -1,7 +1,7 @@
 const $ = (selector) => document.querySelector(selector);
 const elements = {
   form: $("#chatForm"), input: $("#messageInput"), messages: $("#messages"),
-  send: $("#sendButton"), apiUrl: $("#apiUrl"), prompt: $("#characterPrompt"),
+  send: $("#sendButton"), apiUrl: $("#apiUrl"), accessToken: $("#accessToken"), prompt: $("#characterPrompt"),
   importance: $("#importance"), importanceValue: $("#importanceValue"),
   memoryList: $("#memoryList"), memoryPanel: $("#memoryPanel"),
   statusDot: $("#statusDot"), connectionText: $("#connectionText"), toast: $("#toast")
@@ -9,6 +9,7 @@ const elements = {
 
 const storedApiUrl = localStorage.getItem("luna_api_url");
 if (storedApiUrl && !storedApiUrl.includes("luna-memory-api.onrender.com")) elements.apiUrl.value = storedApiUrl;
+elements.accessToken.value = sessionStorage.getItem("luna_access_token") || "";
 let conversationId = crypto.randomUUID();
 const userIdKey = "luna_user_id_v2";
 const userId = localStorage.getItem(userIdKey) || crypto.randomUUID();
@@ -26,7 +27,7 @@ $("#evaluationForm").addEventListener("submit", async (event) => {
   try {
     const res = await fetch(`${apiBase()}/evaluations`, {
       method:"POST",
-      headers:{"Content-Type":"application/json"},
+      headers:{"Content-Type":"application/json", ...authHeaders()},
       body:JSON.stringify(payload)
     });
     if(!res.ok) throw new Error(await responseError(res));
@@ -39,6 +40,10 @@ $("#evaluationForm").addEventListener("submit", async (event) => {
 });
 
 function apiBase() { return elements.apiUrl.value.trim().replace(/\/$/, ""); }
+function authHeaders() {
+  const token = elements.accessToken.value.trim();
+  return token ? { "Authorization": `Bearer ${token}` } : {};
+}
 function now() { return new Intl.DateTimeFormat("ko", { hour: "numeric", minute: "2-digit" }).format(new Date()); }
 function showToast(text) { elements.toast.textContent = text; elements.toast.classList.add("show"); setTimeout(() => elements.toast.classList.remove("show"), 2200); }
 
@@ -86,12 +91,16 @@ function renderMemories(memories) {
 
 async function checkConnection() {
   localStorage.setItem("luna_api_url", apiBase());
+  sessionStorage.setItem("luna_access_token", elements.accessToken.value.trim());
   elements.connectionText.textContent = "연결 확인 중…";
   try {
     const response = await fetch(`${apiBase()}/health`);
     if (!response.ok) throw new Error();
     elements.statusDot.className = "status-dot ok";
-    elements.connectionText.textContent = "백엔드에 연결됨";
+    const info = await response.json().catch(() => ({}));
+    elements.connectionText.textContent = info.auth_mode === "token" && !elements.accessToken.value.trim()
+      ? "백엔드 연결됨 · 액세스 코드 필요"
+      : "백엔드에 연결됨";
     showToast("API 연결을 확인했습니다");
   } catch {
     elements.statusDot.className = "status-dot bad";
@@ -122,7 +131,8 @@ elements.form.addEventListener("submit", async (event) => {
       headers: {
         "Content-Type": "application/json",
         "X-Request-ID": requestId,
-        "Idempotency-Key": requestId
+        "Idempotency-Key": requestId,
+        ...authHeaders()
       },
       body: JSON.stringify({
         user_id: userId,
