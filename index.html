@@ -48,23 +48,36 @@
           <div class="day-divider"><span>오늘</span></div>
           <article class="message assistant">
             <div class="mini-avatar">L</div>
-            <div class="bubble"><p>안녕! 나는 루나야. 우리 이야기를 오래 기억할게.<br />먼저 네가 좋아하는 것부터 알려줄래?</p><time>방금</time></div>
+            <div class="bubble"><p>안녕! 나는 루나야. 테스트 액세스 코드를 입력하면 우리 대화를 시작할 수 있어.</p><time>방금</time></div>
           </article>
         </section>
 
         <form id="chatForm" class="composer">
-          <div class="importance-wrap">
-            <label for="importance">기억 중요도 <strong id="importanceValue">0.7</strong></label>
-            <input id="importance" type="range" min="0" max="1" value="0.7" step="0.1" />
+          <div id="accessGate" class="access-gate">
+            <div class="access-copy">
+              <strong>테스트 액세스 코드</strong>
+              <span>공유받은 코드를 입력하면 대화창이 열립니다.</span>
+            </div>
+            <div class="input-row access-row">
+              <input id="accessToken" type="password" autocomplete="off" placeholder="테스트 액세스 코드 입력" />
+              <button id="unlockButton" type="button">입장</button>
+            </div>
+            <p id="accessError" class="access-error" aria-live="polite"></p>
           </div>
-          <div class="input-row">
-            <textarea id="messageInput" rows="1" placeholder="루나에게 메시지 보내기…" required></textarea>
-            <button id="sendButton" type="submit" aria-label="보내기">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 4 17 8-17 8 3-8-3-8Zm3.8 7h8.3L6.7 6.6 7.8 11Zm-1.1 6.4 9.4-4.4H7.8l-1.1 4.4Z" /></svg>
-            </button>
+          <div id="chatControls" class="chat-controls" hidden>
+            <div class="importance-wrap">
+              <label for="importance">기억 중요도 <strong id="importanceValue">0.7</strong></label>
+              <input id="importance" type="range" min="0" max="1" value="0.7" step="0.1" />
+            </div>
+            <div class="input-row">
+              <textarea id="messageInput" rows="1" placeholder="루나에게 메시지 보내기…"></textarea>
+              <button id="sendButton" type="submit" aria-label="보내기">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 4 17 8-17 8 3-8-3-8Zm3.8 7h8.3L6.7 6.6 7.8 11Zm-1.1 6.4 9.4-4.4H7.8l-1.1 4.4Z" /></svg>
+              </button>
+            </div>
+            <p class="hint">Enter로 전송 · Shift + Enter로 줄바꿈</p>
+            <button id="evaluateButton" class="evaluate-button" type="button">세션 평가하기 · 1~5점</button>
           </div>
-          <p class="hint">Enter로 전송 · Shift + Enter로 줄바꿈</p>
-          <button id="evaluateButton" class="evaluate-button" type="button">세션 평가하기 · 1~5점</button>
         </form>
 
         <section id="accessGate" class="access-gate" aria-labelledby="accessGateTitle">
