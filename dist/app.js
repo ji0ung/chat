@@ -11,10 +11,14 @@ const elements = {
   accessError: $("#accessError"), chatControls: $("#chatControls")
 };
 
-let conversationId = crypto.randomUUID();
 const userIdKey = "luna_user_id_v2";
 const userId = localStorage.getItem(userIdKey) || crypto.randomUUID();
 localStorage.setItem(userIdKey, userId);
+
+const conversationIdKey = `luna_conversation_id_v1:${userId}`;
+const chatHistoryKey = `luna_chat_history_v1:${userId}`;
+let conversationId = localStorage.getItem(conversationIdKey) || crypto.randomUUID();
+localStorage.setItem(conversationIdKey, conversationId);
 
 const characterPromptKey = "luna_character_prompt_v1";
 const systemRulesKey = "luna_system_rules_v1";
@@ -26,14 +30,43 @@ function loadCharacterSettings() {
   if (savedRules !== null) elements.systemRules.value = savedRules;
 }
 
-function saveCharacterSettings() {
+function saveCharacterSettings({ quiet = false } = {}) {
   localStorage.setItem(characterPromptKey, elements.prompt.value);
   localStorage.setItem(systemRulesKey, elements.systemRules.value);
   elements.settingsSaved.textContent = "저장됨";
-  showToast("캐릭터 설정을 저장했습니다");
+  if (!quiet) showToast("캐릭터 설정을 저장했습니다");
   setTimeout(() => {
     elements.settingsSaved.textContent = "";
   }, 1800);
+}
+
+let characterSaveTimer;
+function scheduleCharacterSettingsSave() {
+  clearTimeout(characterSaveTimer);
+  characterSaveTimer = setTimeout(() => saveCharacterSettings({ quiet: true }), 350);
+}
+
+function readChatHistory() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(chatHistoryKey) || "[]");
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function persistChatMessage(role, text, createdAt = Date.now()) {
+  const history = readChatHistory();
+  history.push({ role, text, createdAt });
+  localStorage.setItem(chatHistoryKey, JSON.stringify(history.slice(-200)));
+}
+
+function restoreChatHistory() {
+  const history = readChatHistory();
+  if (!history.length) return false;
+  document.querySelectorAll(".message").forEach((node) => node.remove());
+  history.forEach((item) => addMessage(item.role, item.text, { persist: false, createdAt: item.createdAt }));
+  return true;
 }
 
 function apiBase() {
@@ -133,14 +166,16 @@ $("#evaluationForm").addEventListener("submit", async (event) => {
   }
 });
 
-function addMessage(role, text) {
+function addMessage(role, text, { persist = true, createdAt = Date.now() } = {}) {
   const article = document.createElement("article");
   article.className = `message ${role}`;
   const avatar = role === "assistant" ? '<div class="mini-avatar">L</div>' : "";
-  article.innerHTML = `${avatar}<div class="bubble"><p></p><time>${now()}</time></div>`;
+  const timestamp = new Intl.DateTimeFormat("ko", { hour: "numeric", minute: "2-digit" }).format(new Date(createdAt));
+  article.innerHTML = `${avatar}<div class="bubble"><p></p><time>${timestamp}</time></div>`;
   article.querySelector("p").textContent = text;
   elements.messages.append(article);
   elements.messages.scrollTop = elements.messages.scrollHeight;
+  if (persist) persistChatMessage(role, text, createdAt);
   return article;
 }
 
@@ -155,7 +190,7 @@ function addLoading(label = "") {
 }
 
 function addRetryMessage(text, retry) {
-  const article = addMessage("assistant", text);
+  const article = addMessage("assistant", text, { persist: false });
   const button = document.createElement("button");
   button.type = "button";
   button.className = "retry-button";
@@ -269,17 +304,22 @@ elements.form.addEventListener("submit", async (event) => {
 elements.input.addEventListener("keydown", (event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); elements.form.requestSubmit(); } });
 elements.input.addEventListener("input", () => { elements.input.style.height = "auto"; elements.input.style.height = `${elements.input.scrollHeight}px`; });
 elements.importance.addEventListener("input", () => elements.importanceValue.textContent = Number(elements.importance.value).toFixed(1));
-elements.saveCharacterSettings.addEventListener("click", saveCharacterSettings);
+elements.saveCharacterSettings.addEventListener("click", () => saveCharacterSettings());
+elements.prompt.addEventListener("input", scheduleCharacterSettingsSave);
+elements.systemRules.addEventListener("input", scheduleCharacterSettingsSave);
 $("#memoryToggle").addEventListener("click", () => elements.memoryPanel.classList.add("open"));
 $("#closeMemory").addEventListener("click", () => elements.memoryPanel.classList.remove("open"));
 $("#newChat").addEventListener("click", () => {
   conversationId = crypto.randomUUID();
+  localStorage.setItem(conversationIdKey, conversationId);
+  localStorage.removeItem(chatHistoryKey);
   document.querySelectorAll(".message").forEach((node) => node.remove());
   addMessage("assistant", "새로운 이야기를 시작해 볼까? 이번에도 잘 기억해 둘게.");
   renderMemories([]);
 });
 
 loadCharacterSettings();
+restoreChatHistory();
 
 const savedToken = sessionStorage.getItem("luna_app_access_token");
 if (savedToken) {
