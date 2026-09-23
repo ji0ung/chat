@@ -89,8 +89,6 @@ async def request_logging(request: Request, call_next):
 
 
 class MessageRequest(BaseModel):
-    # Development fallback only. When MVP_ACCESS_TOKENS is configured, the
-    # authenticated token decides the real user id and this field is ignored.
     user_id: str = Field(min_length=1, max_length=128)
     conversation_id: str = Field(min_length=1, max_length=128)
     message: str
@@ -144,18 +142,17 @@ def _bearer_token(authorization: str | None) -> str | None:
 
 
 def resolve_user_id(body_user_id: str, authorization: str | None) -> str:
-    # Local/dev compatibility: no token map means body user_id is allowed.
-    # Before external sharing, configure MVP_ACCESS_TOKENS.
-    if not settings.access_tokens:
+    # Local development remains open when APP_ACCESS_TOKEN is unset.
+    if not settings.app_access_token:
         return body_user_id
 
     token = _bearer_token(authorization)
-    if not token or token not in settings.access_tokens:
+    if not token or token != settings.app_access_token:
         raise HTTPException(
             status_code=401,
-            detail={"code": "AUTH_REQUIRED", "message": "다시 로그인해주세요."},
+            detail={"code": "AUTH_REQUIRED", "message": "액세스 코드를 확인해주세요."},
         )
-    return settings.access_tokens[token]
+    return body_user_id
 
 
 def require_admin(x_admin_token: str | None) -> None:
@@ -247,7 +244,7 @@ def health() -> dict[str, str]:
         "status": "ok",
         "llm_provider": settings.llm_provider,
         "embedding_provider": settings.embedding_provider,
-        "auth_mode": "token" if settings.access_tokens else "development",
+        "auth_mode": "app_token" if settings.app_access_token else "development",
     }
 
 
